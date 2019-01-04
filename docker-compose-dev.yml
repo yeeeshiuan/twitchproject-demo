@@ -1,0 +1,28 @@
+version: '3.6'
+services:
+  mongo-db:
+    build:
+      context: ./services/mongodb
+      dockerfile: Dockerfile
+    volumes:
+      - '/data/db'
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=mongodb
+  client:
+    build:
+      context: ./services/client
+      dockerfile: Dockerfile-dev
+    volumes:
+      - './services/client:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=mongodb://mongodb:mongodb@mongo-db:27017/data_dev
+      - DATABASE_TEST_URL=mongodb://mongodb:mongodb@mongo-db:27017/data_test
+    depends_on:
+      - mongo-db
