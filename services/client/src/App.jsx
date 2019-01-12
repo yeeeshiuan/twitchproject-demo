@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import ReactTwitchEmbedVideo from 'react-twitch-embed-video';
 import TwitchIRC from './components/TwitchIRC';
+import TwitchEmbedVideo from './components/TwitchEmbedVideo';
 
 class App extends Component {
   constructor() {
@@ -25,21 +25,53 @@ class App extends Component {
         /** The Twitch embed color theme to use. Valid values: light or dark. Default: light. */
         theme: "dark",
       },
+      twitchIRCProps: {
+        options: {
+        /** delieve log messages */
+            debug: false
+        },
+        connection: {
+            reconnect: true
+        },
+        identity: {
+          username:`${process.env.REACT_APP_TWITCH_USER_NAME}` ,
+          password:`${process.env.REACT_APP_TWITCH_OAUTH_TOKEN}`,
+        },
+        channels: [
+          `${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
+        ],
+      },
+      channelName:"",
     };
-  };
-
-  componentDidMount() {
-    this.updateChannelName("kyo1984123");
+    /** event binding **/
+    this.changeChannel = this.changeChannel.bind(this);
+    this.handleChangeChannel = this.handleChangeChannel.bind(this);
   };
 
   updateChannelName(channelName) {
     // update channel
-    this.setState({
-      twitchEmbedVideoProps:{
-        channel:channelName,
-      },
-    });
+    const obj = this.state;
+    obj.twitchEmbedVideoProps.channel = channelName;
+    // remove old channel
+    obj.twitchIRCProps.channels.pop();
+    // add new channel
+    obj.twitchIRCProps.channels.push(channelName);
+
+    // update
+    this.setState({...obj});
   };
+
+  changeChannel(event) {
+    event.preventDefault();
+    this.updateChannelName(this.state.channelName);
+    console.log(this.state);
+  };
+
+  handleChangeChannel(event) {
+    const obj = {};
+    obj[event.target.name] = event.target.value;
+    this.setState(obj);
+  }
 
   render() {
     return (
@@ -50,9 +82,28 @@ class App extends Component {
               Hello world!
             </p>
           </div>
-          <TwitchIRC />
           <div>
-            <ReactTwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
+            <TwitchIRC twitchIRCProps={this.state.twitchIRCProps}/>
+          </div>
+          <div>
+            <form onSubmit={(event) => this.changeChannel(event)}>
+              <input
+                name="channelName"
+                className="input is-large"
+                type="text"
+                placeholder="Enter channel name"
+                required
+                onChange={this.handleChangeChannel}
+              />
+              <input
+                type="submit"
+                className="button is-primary is-large is-fullwidth"
+                value="Submit"
+              />
+            </form>
+          </div>
+          <div>
+            <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
           </div>
         </header>
       </div>

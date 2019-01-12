@@ -1,27 +1,13 @@
 import React, { Component } from 'react';
-import client from 'react-tmi';
+import ReactTMI from 'react-tmi';
 import MessageList from './MessageList';
 
 class TwitchIRC extends Component {
   constructor() {
     super();
     this.state = {
-      twitchIRCProps: {
-        options: {
-        /** delieve log messages */
-            debug: false
-        },
-        connection: {
-            reconnect: true
-        },
-        identity: {
-          username:`${process.env.REACT_APP_TWITCH_USER_NAME}` ,
-          password:`${process.env.REACT_APP_TWITCH_OAUTH_TOKEN}`,
-        },
-        channels: [
-          `${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
-        ],
-      },
+      /** channel **/
+      channel:"",
       /** messages **/
       messages:[],
       messageCount: 0,
@@ -35,14 +21,14 @@ class TwitchIRC extends Component {
   };
 
   componentDidMount() {
-    
-    this.updateChannelName("kyo1984123");
-
     if (this.myClient === null) {
+      //debug
+      console.log(this.props.twitchIRCProps);
 
-      console.log(this.state);
+      this.setState({channel: this.props.twitchIRCProps.channels[0]});
+
       // create instance
-      this.myClient = new client.client(this.state.twitchIRCProps);
+      this.myClient = new ReactTMI.client(this.props.twitchIRCProps);
 
       // Register our event handlers (defined below)
       this.myClient.on('message', this.onMessageHandler);
@@ -55,21 +41,29 @@ class TwitchIRC extends Component {
     }
   };
 
-  updateChannelName(channelName) {
-    // remove old channel
-    this.setState({
-      twitchIRCProps:{
-        channels:this.state.twitchIRCProps.channels.pop(),
-      },
-    });
+  componentWillReceiveProps() {
+    // You don't have to do this check first, but it can help prevent an unneeded render
+    if (this.props.twitchIRCProps.channels[0] !== this.state.channel) {
+      this.setState({channel: this.props.twitchIRCProps.channels[0]});
 
-    // add new channel
-    this.setState({
-      twitchIRCProps:{
-        channels: this.state.twitchIRCProps.channels.push(channelName),
-      },
-    });
-  };
+      //debug
+      console.log(this.props.twitchIRCProps);
+
+      this.myClient.disconnect();
+
+      // create instance
+      this.myClient = new ReactTMI.client(this.props.twitchIRCProps);
+
+      // Register our event handlers (defined below)
+      this.myClient.on('message', this.onMessageHandler);
+
+      // Connect to server
+      this.myClient.connect();
+
+      // debug
+      console.log(this.myClient);
+    }
+  }
 
   // Called every time a message comes in
   onMessageHandler (target, context, msg, self) {
@@ -125,6 +119,7 @@ class TwitchIRC extends Component {
   }
 
   render() {
+    {console.log(this.state.channel);}
     return (
         <MessageList messages={this.state.messages} />
     );
