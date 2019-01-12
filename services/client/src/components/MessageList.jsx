@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 
 class MessageList extends Component {
-  constructor() {
-    super();
-  }
 
   render() {
+    {console.log("MessageList");}
     return (
         this.props.messages.map(message => {
           return (

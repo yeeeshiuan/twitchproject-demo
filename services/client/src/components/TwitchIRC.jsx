@@ -80,12 +80,13 @@ class TwitchIRC extends Component {
       messageCountTmp = messageCountTmp + 1;
     }
 
-    const messagesTmp = this.state.messages
+    let messagesTmp = [...this.state.messages];
     // control the size of messages
     if (messagesTmp.length >= this.state.messageCountMax) {
       // remove older data
-      messagesTmp.slice(1);
+      messagesTmp = messagesTmp.slice(1);
     }
+    console.log(messagesTmp);
 
     // If the command is known, let's execute it
     if (message.text === this.state.singleCommand) {
@@ -95,7 +96,7 @@ class TwitchIRC extends Component {
       console.log(`* Executed ${message.text} command`);
 
       /* append new data */
-      messagesTmp.concat(message);
+      messagesTmp.push(message);
       this.setState({
           messages: messagesTmp,
           messageCount: messageCountTmp,
@@ -105,12 +106,14 @@ class TwitchIRC extends Component {
       console.log(`* Unknown command ${message.text}`);
 
       /* append new data */
-      messagesTmp.concat(message);
+      messagesTmp.push(message);
       this.setState({
           messages: messagesTmp,
           messageCount: messageCountTmp,
       });
     }
+    console.log(messageCountTmp);
+    console.log(this.state.messageCount);
   }
 
   // Function called when the "dice" command is issued
@@ -120,10 +123,9 @@ class TwitchIRC extends Component {
   }
 
   render() {
-    {console.log(this.state.channel);}
     return (
         <MessageList messages={this.state.messages} />
-    );
+    )
   }
 }
 
