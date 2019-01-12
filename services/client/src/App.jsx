@@ -56,7 +56,6 @@ class App extends Component {
     obj.twitchIRCProps.channels.pop();
     // add new channel
     obj.twitchIRCProps.channels.push(channelName);
-
     // update
     this.setState({...obj});
   };
@@ -64,7 +63,6 @@ class App extends Component {
   changeChannel(event) {
     event.preventDefault();
     this.updateChannelName(this.state.channelName);
-    console.log(this.state);
   };
 
   handleChangeChannel(event) {

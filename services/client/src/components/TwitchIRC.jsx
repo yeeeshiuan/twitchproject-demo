@@ -11,6 +11,9 @@ class TwitchIRC extends Component {
       /** messages **/
       messages:[],
       messageCount: 0,
+      messageCountMax: 5,
+      /** custom commands **/
+      singleCommand: '!7777',
     };
     /** My TMI client */
     this.myClient = null;
@@ -41,13 +44,11 @@ class TwitchIRC extends Component {
     }
   };
 
+
   componentWillReceiveProps() {
     // You don't have to do this check first, but it can help prevent an unneeded render
     if (this.props.twitchIRCProps.channels[0] !== this.state.channel) {
       this.setState({channel: this.props.twitchIRCProps.channels[0]});
-
-      //debug
-      console.log(this.props.twitchIRCProps);
 
       this.myClient.disconnect();
 
@@ -59,9 +60,6 @@ class TwitchIRC extends Component {
 
       // Connect to server
       this.myClient.connect();
-
-      // debug
-      console.log(this.myClient);
     }
   }
 
@@ -75,39 +73,42 @@ class TwitchIRC extends Component {
       text: msg.trim(),
     };
 
-    if (this.state.messageCount >= 5) {
-      this.setState({
-          messageCount: 0,
-      });
+    let messageCountTmp = this.state.messageCount;
+    if (messageCountTmp >= this.state.messageCountMax) {
+      messageCountTmp = 0;
     } else {
-      this.setState({
-          messageCount: this.state.messageCount + 1,
-      });
+      messageCountTmp = messageCountTmp + 1;
     }
-    console.log(this.state.messageCount);
 
+    const messagesTmp = this.state.messages
     // control the size of messages
-    if (this.state.messages.length >= 5) {
-      this.setState({
-        messages: [...this.state.messages.slice(1)],
-      });
+    if (messagesTmp.length >= this.state.messageCountMax) {
+      // remove older data
+      messagesTmp.slice(1);
     }
 
     // If the command is known, let's execute it
-    if (message.text === '!7777') {
+    if (message.text === this.state.singleCommand) {
       const num = this.rollDice();
+      /** chat bot say something **/
       this.myClient.say(target, `${num}`);
       console.log(`* Executed ${message.text} command`);
-      
+
+      /* append new data */
+      messagesTmp.concat(message);
       this.setState({
-          messages: this.state.messages.concat(message),
+          messages: messagesTmp,
+          messageCount: messageCountTmp,
       });
 
     } else {
       console.log(`* Unknown command ${message.text}`);
 
+      /* append new data */
+      messagesTmp.concat(message);
       this.setState({
-          messages: this.state.messages.concat(message),
+          messages: messagesTmp,
+          messageCount: messageCountTmp,
       });
     }
   }
