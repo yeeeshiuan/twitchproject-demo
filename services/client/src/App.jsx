@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import axios from 'axios';
+
 import TwitchIRC from './components/TwitchIRC';
 import TwitchEmbedVideo from './components/TwitchEmbedVideo';
 
@@ -46,6 +48,8 @@ class App extends Component {
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
     this.handleChangeChannel = this.handleChangeChannel.bind(this);
+
+    this.twitchOAuthImplicit = this.twitchOAuthImplicit.bind(this);
   };
 
   updateChannelName(channelName) {
@@ -69,6 +73,15 @@ class App extends Component {
     const obj = {};
     obj[event.target.name] = event.target.value;
     this.setState(obj);
+  }
+
+  twitchOAuthImplicit(event) {
+    event.preventDefault();
+    axios.get(`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_DOMAIN_NAME}&response_type=token&scope=viewing_activity_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
+        {headers: {'*':'*'}
+    })
+    .then((res) => { console.log(res); })
+    .catch((err) => { });
   }
 
   render() {
@@ -102,6 +115,16 @@ class App extends Component {
           </div>
           <div>
             <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
+          </div>
+
+          <div>
+            <form onSubmit={(event) => this.twitchOAuthImplicit(event)}>
+              <input
+                type="submit"
+                className="button is-primary is-large is-fullwidth"
+                value="Submit"
+              />
+            </form>
           </div>
         </header>
       </div>

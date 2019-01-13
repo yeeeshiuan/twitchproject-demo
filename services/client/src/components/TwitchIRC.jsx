@@ -86,7 +86,6 @@ class TwitchIRC extends Component {
       // remove older data
       messagesTmp = messagesTmp.slice(1);
     }
-    console.log(messagesTmp);
 
     // If the command is known, let's execute it
     if (message.text === this.state.singleCommand) {
@@ -112,8 +111,6 @@ class TwitchIRC extends Component {
           messageCount: messageCountTmp,
       });
     }
-    console.log(messageCountTmp);
-    console.log(this.state.messageCount);
   }
 
   // Function called when the "dice" command is issued
