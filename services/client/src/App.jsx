@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { Route, Switch } from 'react-router-dom';
 
 import TwitchIRC from './components/TwitchIRC';
 import TwitchEmbedVideo from './components/TwitchEmbedVideo';
+import AuthImplicit from './components/AuthImplicit';
 
 class App extends Component {
   constructor() {
@@ -44,13 +46,16 @@ class App extends Component {
         ],
       },
       channelName:"",
+      twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_DOMAIN_NAME}&response_type=token&scope=viewing_activity_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
     };
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
     this.handleChangeChannel = this.handleChangeChannel.bind(this);
-
-    this.twitchOAuthImplicit = this.twitchOAuthImplicit.bind(this);
   };
+
+  componentDidMount() {
+    
+  }
 
   updateChannelName(channelName) {
     // update channel
@@ -62,26 +67,17 @@ class App extends Component {
     obj.twitchIRCProps.channels.push(channelName);
     // update
     this.setState({...obj});
-  };
+  }
 
   changeChannel(event) {
     event.preventDefault();
     this.updateChannelName(this.state.channelName);
-  };
+  }
 
   handleChangeChannel(event) {
     const obj = {};
     obj[event.target.name] = event.target.value;
     this.setState(obj);
-  }
-
-  twitchOAuthImplicit(event) {
-    event.preventDefault();
-    axios.get(`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_DOMAIN_NAME}&response_type=token&scope=viewing_activity_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
-        {headers: {'*':'*'}
-    })
-    .then((res) => { console.log(res); })
-    .catch((err) => { });
   }
 
   render() {
@@ -116,16 +112,14 @@ class App extends Component {
           <div>
             <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
           </div>
-
           <div>
-            <form onSubmit={(event) => this.twitchOAuthImplicit(event)}>
-              <input
-                type="submit"
-                className="button is-primary is-large is-fullwidth"
-                value="Submit"
-              />
-            </form>
+            <a href={this.state.twitchOAuthImplicit}>login twitch</a>
           </div>
+          <Switch>
+              <Route path="/auth" render={(props) => (
+                <AuthImplicit {...props} />
+              )} />
+          </Switch>
         </header>
       </div>
     );
