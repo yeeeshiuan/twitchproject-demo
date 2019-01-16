@@ -46,7 +46,7 @@ class App extends Component {
         ],
       },
       channelName:"",
-      twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_DOMAIN_NAME}&response_type=token&scope=viewing_activity_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
+      twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_DOMAIN_NAME}&response_type=token&scope=user_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
     };
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
