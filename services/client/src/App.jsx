@@ -5,6 +5,7 @@ import { Route, Switch } from 'react-router-dom';
 import TwitchIRC from './components/TwitchIRC';
 import TwitchEmbedVideo from './components/TwitchEmbedVideo';
 import AuthImplicit from './components/AuthImplicit';
+import Logout from './components/Logout';
 
 class App extends Component {
   constructor() {
@@ -47,15 +48,34 @@ class App extends Component {
       },
       channelName:"",
       twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_DOMAIN_NAME}&response_type=token&scope=user_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
+      isAuthenticated: false,
     };
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
     this.handleChangeChannel = this.handleChangeChannel.bind(this);
+    this.loginUser = this.loginUser.bind(this);
+    this.logoutUser = this.logoutUser.bind(this);
   };
 
   componentDidMount() {
     
   }
+
+  componentWillMount() {
+    if (window.localStorage.getItem('authToken')) {
+      this.setState({ isAuthenticated: true });
+    };
+  };
+
+  loginUser(token) {
+    window.localStorage.setItem('authToken', token);
+    this.setState({ isAuthenticated: true });
+  };
+
+  logoutUser() {
+    window.localStorage.clear();
+    this.setState({ isAuthenticated: false });
+  };
 
   updateChannelName(channelName) {
     // update channel
@@ -116,8 +136,17 @@ class App extends Component {
             <a href={this.state.twitchOAuthImplicit}>login twitch</a>
           </div>
           <Switch>
-              <Route path="/auth" render={(props) => (
-                <AuthImplicit {...props} />
+              <Route path="/authByTwitch" render={(props) => (
+                <AuthImplicit 
+                    loginUser={this.loginUser}
+                    {...props} 
+                />
+              )} />
+              <Route exact path='/logout' render={() => (
+                <Logout
+                  logoutUser={this.logoutUser}
+                  isAuthenticated={this.state.isAuthenticated}
+                />
               )} />
           </Switch>
         </header>

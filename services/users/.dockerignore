@@ -1,0 +1,9 @@
+env
+htmlcov
+__pycache__
+migrations
+
+.dockerignore
+Dockerfile-dev
+Dockerfile-prod
+localTestEnvSet
