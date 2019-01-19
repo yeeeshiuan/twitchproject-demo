@@ -72,7 +72,7 @@ class AuthImplicit extends Component {
     axios(options)
     .then((res) => { 
         console.log(res.data);
-        this.props.loginUser(res.data.auth_token);
+        this.props.loginUser(res.data.auth_token, "sso");
     })
     .catch((err) => { console.log(err); });
   }

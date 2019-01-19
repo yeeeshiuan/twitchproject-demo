@@ -49,12 +49,16 @@ class App extends Component {
       channelName:`${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
       twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_DOMAIN_NAME}&response_type=token&scope=user_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
       isAuthenticated: false,
+      // normal: register by this site
+      // sso   : login by twitch or google SSO
+      loginType: "normal",
     };
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
     this.handleChangeChannel = this.handleChangeChannel.bind(this);
     this.loginUser = this.loginUser.bind(this);
     this.logoutUser = this.logoutUser.bind(this);
+    this.authpingpon = this.authpingpon.bind(this);
   };
 
   componentDidMount() {
@@ -63,13 +67,53 @@ class App extends Component {
 
   componentWillMount() {
     if (window.localStorage.getItem('authToken')) {
-      this.setState({ isAuthenticated: true });
+      this.setState({ isAuthenticated: true,
+                      loginType: window.localStorage.getItem('authToken')
+      });
     };
   };
 
-  loginUser(token) {
+  authpingpon() {
+    const options = {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json', 
+                  'Authorization': `Bearer ${window.localStorage.authToken}`,
+                  'LoginType': `${window.localStorage.loginType}`,
+        },
+        url: 'http://localhost/lexical/authping'
+    };
+    console.log(options);
+    axios(options)
+    .then((res) => { 
+        console.log(res.data);
+    })
+    .catch((error) => { 
+        // Error
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+        } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+        }
+        console.log(error.config);
+     });
+  }
+
+  loginUser(token, loginType) {
     window.localStorage.setItem('authToken', token);
-    this.setState({ isAuthenticated: true });
+    window.localStorage.setItem('loginType', loginType);
+    this.setState({ isAuthenticated: true,
+                    loginType: loginType
+    });
   };
 
   logoutUser() {
@@ -135,6 +179,16 @@ class App extends Component {
           </div>
           <div>
             <a href={this.state.twitchOAuthImplicit}>login twitch</a>
+          </div>
+          <div>
+            <button
+              onClick={event => {
+                event.preventDefault();
+                this.authpingpon();
+              }}
+            >
+              Get auth lexical ping
+            </button>
           </div>
           <Switch>
               <Route path="/authByTwitch" render={(props) => (

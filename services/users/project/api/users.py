@@ -19,7 +19,7 @@ def ping_pong():
 
 @users_blueprint.route('/users', methods=['POST'])
 @authenticate
-def add_user(resp):
+def add_user(resp, login_type):
     post_data = request.get_json()
 
     response_object = {

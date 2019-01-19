@@ -79,6 +79,7 @@ class UserSSO(db.Model):
     google_id = db.Column(db.String(64))
     username = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(128), unique=True, nullable=False)
+    active = db.Column(db.Boolean(), default=True, nullable=False)
     created_date = db.Column(db.DateTime, default=func.now(), nullable=False)
     picture = db.Column(db.String(255))
 
@@ -129,6 +130,7 @@ class UserSSO(db.Model):
                 'twitch_id': self.twitch_id,
                 'username': self.username,
                 'email': self.email,
+                'active': self.active,
                 'picture': self.picture
             }
         else:
@@ -137,5 +139,6 @@ class UserSSO(db.Model):
                 'google_id': self.google_id,
                 'username': self.username,
                 'email': self.email,
+                'active': self.active,
                 'picture': self.picture
             }

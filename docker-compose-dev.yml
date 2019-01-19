@@ -54,5 +54,17 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-
+  lexical:
+    build:
+      context: ./services/lexical
+      dockerfile: Dockerfile-dev
+    volumes:
+      - './services/lexical:/usr/src/app'
+    ports:
+      - 5002:5000
+    environment:
+      - FLASK_ENV=development
+      - APP_SETTINGS=project.config.DevelopmentConfig
+      - USERS_SERVICE_URL=http://users:5000
+      - SECRET_KEY=my_precious
 
