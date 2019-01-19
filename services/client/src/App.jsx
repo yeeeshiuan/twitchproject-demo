@@ -46,7 +46,7 @@ class App extends Component {
           `${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
         ],
       },
-      channelName:"",
+      channelName:`${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
       twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_DOMAIN_NAME}&response_type=token&scope=user_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
       isAuthenticated: false,
     };
@@ -119,6 +119,7 @@ class App extends Component {
                 className="input is-large"
                 type="text"
                 placeholder="Enter channel name"
+                value={this.state.channelName}
                 required
                 onChange={this.handleChangeChannel}
               />
