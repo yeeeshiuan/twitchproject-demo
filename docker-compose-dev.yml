@@ -66,5 +66,16 @@ services:
       - FLASK_ENV=development
       - APP_SETTINGS=project.config.DevelopmentConfig
       - USERS_SERVICE_URL=http://users:5000
+      - HANLP_SERVICE_URL=http://hanlp:3000
       - SECRET_KEY=my_precious
+    depends_on:
+      - users
+  hanlp:
+    build:
+      context: ./services/hanlp
+      dockerfile: Dockerfile
+    expose:
+      - 3000
+    depends_on:
+      - lexical
 

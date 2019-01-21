@@ -51,3 +51,17 @@ def ensure_authenticated(token, login_type):
         return data
     else:
         return False
+
+def getAnalyze(sentence):
+    if current_app.config['TESTING']:
+        return True
+    url = '{0}/keyword'.format(current_app.config['HANLP_SERVICE_URL'])
+    headers = {'Content-Type': 'application/json'}
+    data = {'num': 2, 'content': sentence}
+    response = requests.post(url, headers=headers, json=data)
+    data = json.loads(response.text)
+    if response.status_code == 200 and \
+       data['status'] == 'success':
+        return data
+    else:
+        return False
