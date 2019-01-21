@@ -76,8 +76,7 @@ class App extends Component {
   authpingpon() {
     const options = {
         method: 'GET',
-        headers: {'Content-Type': 'application/json', 
-                  'Authorization': `Bearer ${window.localStorage.authToken}`,
+        headers: {'Authorization': `Bearer ${window.localStorage.authToken}`,
                   'LoginType': `${window.localStorage.loginType}`,
         },
         url: 'http://localhost/lexical/authping'

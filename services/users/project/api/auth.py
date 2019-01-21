@@ -195,10 +195,13 @@ def logout_user(resp, login_type):
 @auth_blueprint.route('/auth/status', methods=['GET'])
 @authenticate
 def get_user_status(resp, login_type):
-    print("users auth status start", file=sys.stderr)
-    user = User.query.filter_by(id=resp).first() if login_type == "normal" else UserSSO.query.filter_by(id=resp).first()
 
-    print(f"users auth user={user}", file=sys.stderr)
+    user = None
+    if login_type == "normal":
+        user = User.query.filter_by(id=resp).first()
+    else:
+        user = UserSSO.query.filter_by(id=resp).first()
+
     response_object = {
         'status': 'success',
         'message': 'success',

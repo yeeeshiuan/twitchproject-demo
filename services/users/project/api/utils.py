@@ -12,25 +12,32 @@ def authenticate(f):
             'status': 'fail',
             'message': 'Provide a valid auth token.'
         }
-        print(f'12345', file=sys.stderr)
+
         auth_header = request.headers.get('Authorization')
         if not auth_header:
             return jsonify(response_object), 403
-        print(f'56789', file=sys.stderr)
+
         login_type = request.headers.get('LoginType')
         if not login_type:
             response_object['message'] = 'There is no login type.'
             return jsonify(response_object), 403
-        print(f'login type={login_type}', file=sys.stderr)
 
         auth_token = auth_header.split(" ")[1]
-        resp = User.decode_auth_token(auth_token) if login_type == "normal" else UserSSO.decode_auth_token(auth_token)
-        print(f'users decorate resp={resp}', file=sys.stderr)
+        resp = None
+        if login_type == "normal":
+            resp = User.decode_auth_token(auth_token)
+        else:
+            resp = UserSSO.decode_auth_token(auth_token)
+
         if isinstance(resp, str):
             response_object['message'] = resp
             return jsonify(response_object), 401
 
-        user = User.query.filter_by(id=resp).first() if login_type == "normal" else UserSSO.query.filter_by(id=resp).first()
+        user = None
+        if login_type == "normal":
+            user = User.query.filter_by(id=resp).first()
+        else:
+            user = UserSSO.query.filter_by(id=resp).first()
 
         if not user or not user.active:
             return jsonify(response_object), 401
