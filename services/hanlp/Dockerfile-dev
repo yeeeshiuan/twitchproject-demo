@@ -1,0 +1,14 @@
+FROM node:7.9.0
+MAINTAINER Hain Wang <hailiang.hl.wang@gmail.com>
+
+RUN apt-get update
+RUN apt-get install openjdk-7-jdk -yy
+
+RUN /bin/bash -c "mkdir -p /hanlp-api"
+COPY . /hanlp-api
+
+WORKDIR /hanlp-api
+RUN npm install
+
+ENTRYPOINT ["node"]
+CMD ["app.js"]

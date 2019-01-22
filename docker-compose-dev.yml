@@ -73,7 +73,7 @@ services:
   hanlp:
     build:
       context: ./services/hanlp
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
     expose:
       - 3000
     depends_on:
