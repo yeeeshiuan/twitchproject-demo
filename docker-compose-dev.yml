@@ -11,9 +11,9 @@ services:
       - 3000
     environment:
       - NODE_ENV=development
-      - REACT_APP_USERS_SERVICE_URL=${REACT_APP_USERS_SERVICE_URL}
+      - REACT_APP_DOMAIN_NAME_URL=${REACT_APP_DOMAIN_NAME_URL}
       - REACT_APP_CSRF_TOKEN=${REACT_APP_CSRF_TOKEN}
-      - REACT_APP_DOMAIN_NAME=${REACT_APP_DOMAIN_NAME}
+      - REACT_APP_TWITCH_CALLBACK_URL=${REACT_APP_TWITCH_CALLBACK_URL}
       - REACT_APP_TWITCH_OAUTH_LINK=${REACT_APP_TWITCH_OAUTH_LINK}
       - REACT_APP_TWITCH_CLIENT_ID=${REACT_APP_TWITCH_CLIENT_ID}
       - REACT_APP_TWITCH_USER_NAME=${REACT_APP_TWITCH_USER_NAME}
@@ -66,16 +66,7 @@ services:
       - FLASK_ENV=development
       - APP_SETTINGS=project.config.DevelopmentConfig
       - USERS_SERVICE_URL=http://users:5000
-      - HANLP_SERVICE_URL=http://hanlp:3000
       - SECRET_KEY=my_precious
     depends_on:
       - users
-  hanlp:
-    build:
-      context: ./services/hanlp
-      dockerfile: Dockerfile-dev
-    expose:
-      - 3000
-    depends_on:
-      - lexical
 

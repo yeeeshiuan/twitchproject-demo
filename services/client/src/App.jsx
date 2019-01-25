@@ -47,11 +47,12 @@ class App extends Component {
         ],
       },
       channelName:`${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
-      twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_DOMAIN_NAME}&response_type=token&scope=user_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
+      twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_TWITCH_CALLBACK_URL}&response_type=token&scope=user_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
       isAuthenticated: false,
       // normal: register by this site
       // sso   : login by twitch or google SSO
       loginType: "normal",
+      enableLexicalAnalyzeService: true,
     };
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
@@ -79,7 +80,7 @@ class App extends Component {
         headers: {'Authorization': `Bearer ${window.localStorage.authToken}`,
                   'LoginType': `${window.localStorage.loginType}`,
         },
-        url: 'http://localhost/lexical/authping'
+        url: 'http://localhost/lexical/authping' //TODO
     };
     console.log(options);
     axios(options)
@@ -143,17 +144,47 @@ class App extends Component {
     this.setState(obj);
   }
 
+  get loginTwitchButton() {
+    let logoutURL = `${process.env.REACT_APP_DOMAIN_NAME_URL}/logout`
+    if (this.state.isAuthenticated === false) {
+        return (
+            <div>
+                <a href={this.state.twitchOAuthImplicit}>Login twitch</a>
+            </div>
+        );
+    } else {
+        return (
+            <div>
+                <a href={logoutURL}>Logout</a>
+            </div>
+        );
+    }
+  }
+
+  get lexicalAuthTest() {
+    return (
+      <div>
+        <button
+          onClick={event => {
+            event.preventDefault();
+            this.authpingpon();
+          }}
+        >
+          Get auth lexical ping
+        </button>
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
           <div>
-            <p>
-              Hello world!
-            </p>
-          </div>
-          <div>
-            <TwitchIRC twitchIRCProps={this.state.twitchIRCProps}/>
+            <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
+                       isAuthenticated={this.state.isAuthenticated}
+                       enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
+            />
           </div>
           <div>
             <form onSubmit={(event) => this.changeChannel(event)}>
@@ -177,18 +208,9 @@ class App extends Component {
             <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
           </div>
           <div>
-            <a href={this.state.twitchOAuthImplicit}>login twitch</a>
           </div>
-          <div>
-            <button
-              onClick={event => {
-                event.preventDefault();
-                this.authpingpon();
-              }}
-            >
-              Get auth lexical ping
-            </button>
-          </div>
+          { this.loginTwitchButton }
+          { this.lexicalAuthTest }
           <Switch>
               <Route path="/authByTwitch" render={(props) => (
                 <AuthImplicit 

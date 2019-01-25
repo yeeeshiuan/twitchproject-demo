@@ -7,3 +7,5 @@ Flask-Testing==0.6.2
 gunicorn==19.8.1
 psycopg2-binary==2.7.4
 requests==2.19.1
+jieba==0.39
+opencc-python-reimplemented==0.1.4

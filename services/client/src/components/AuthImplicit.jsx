@@ -12,14 +12,28 @@ class AuthImplicit extends Component {
     };
   }
 
-  getUserReference(token) {
+  componentDidMount() {
+    /** get params from url fragment **/
+    let params = queryString.parse(this.props.location.hash);
+    this.getUserReference(params.access_token, params.state);
+  }
+
+  getUserReference(token, state) {
+
+    // CSRF isn't correct
+    if (state !== `${process.env.REACT_APP_CSRF_TOKEN}`) {
+        this.setState({twitchUnauthorized: true});
+        console.log("CSRF is not correct.");
+        return;
+    }
+
     const options = {
         method: 'GET',
-        headers: {'Accept': 'application/vnd.twitchtv.v5+json', 
+        headers: {'Accept': 'application/vnd.twitchtv.v5+json', //TODO
                   'Client-ID': `${process.env.REACT_APP_TWITCH_CLIENT_ID}`,
                   'Authorization': `OAuth ${token}`,
         },
-        url: 'https://api.twitch.tv/kraken/user'
+        url: 'https://api.twitch.tv/kraken/user' //TODO
     };
 
     axios(options)
@@ -36,9 +50,10 @@ class AuthImplicit extends Component {
             console.log(error.response.status);
             console.log(error.response.headers);
             
-            // user doesn't give twitch the authoried
+            // user doesn't give twitch the auth
             if (error.response.data.error === "Unauthorized") {
                 this.setState({twitchUnauthorized: true});
+                console.log("Twitch return error.(Unauthorized)");
             }
             
         } else if (error.request) {
@@ -64,7 +79,7 @@ class AuthImplicit extends Component {
             email: userRef.email,
             picture: userRef.logo
         },
-        url: `${process.env.REACT_APP_USERS_SERVICE_URL}/auth/twitchRegister`
+        url: `${process.env.REACT_APP_DOMAIN_NAME_URL}/auth/twitchRegister`
     };
 
     console.log(options);
@@ -77,22 +92,8 @@ class AuthImplicit extends Component {
     .catch((err) => { console.log(err); });
   }
 
-  componentDidMount() {
-    /** get params from url fragment **/
-    let params = queryString.parse(this.props.location.hash);
-    this.getUserReference(params.access_token);
-  }
-
   render() {
-    if (this.state.twitchUnauthorized) {
-      return <Redirect to='/' />;
-    };
-    return (
-        <div>
-            <p>see consoleLog</p>
-        </div>
-
-    )
+    return <Redirect to='/' />;
   }
 }
 
