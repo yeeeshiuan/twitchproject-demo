@@ -4,6 +4,7 @@ import axios from 'axios';
 import Queue from './Queue.js';
 
 import MessageList from './MessageList';
+import MessagesAnalyze from './MessagesAnalyze';
 
 class TwitchIRC extends Component {
   constructor() {
@@ -101,7 +102,7 @@ class TwitchIRC extends Component {
   }
 
   updateObject(tag, sourceObject) {
-    
+    // if exist then update, if not exist then add
     for (let key in sourceObject) {
         // skip loop if the property is from prototype
         if (!sourceObject.hasOwnProperty(key)) continue;
@@ -247,7 +248,10 @@ class TwitchIRC extends Component {
 
   render() {
     return (
-        <MessageList messages={this.state.messages} />
+        <div>
+            <MessageList messages={this.state.messages} />
+            <MessagesAnalyze messagesAnalyze={this.messagesAnalyze}/>
+        </div>
     )
   }
 }

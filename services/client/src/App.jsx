@@ -181,12 +181,6 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <div>
-            <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
-                       isAuthenticated={this.state.isAuthenticated}
-                       enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
-            />
-          </div>
-          <div>
             <form onSubmit={(event) => this.changeChannel(event)}>
               <input
                 name="channelName"
@@ -207,10 +201,14 @@ class App extends Component {
           <div>
             <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
           </div>
-          <div>
-          </div>
           { this.loginTwitchButton }
           { this.lexicalAuthTest }
+          <div>
+            <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
+                       isAuthenticated={this.state.isAuthenticated}
+                       enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
+            />
+          </div>
           <Switch>
               <Route path="/authByTwitch" render={(props) => (
                 <AuthImplicit 
