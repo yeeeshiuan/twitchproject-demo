@@ -5,6 +5,7 @@ import Queue from './Queue.js';
 
 import MessageList from './MessageList';
 import MessagesAnalyze from './MessagesAnalyze';
+import BarChartComponent from "./BarChartComponent";
 
 class TwitchIRC extends Component {
   constructor() {
@@ -20,6 +21,7 @@ class TwitchIRC extends Component {
       messagesQueue: new Queue(),
       /** max messages queue has **/
       messagesQueueMax: 10,
+      data: [],
     };
     /** channel **/
     this.channel = "";
@@ -103,41 +105,50 @@ class TwitchIRC extends Component {
 
   updateObject(tag, sourceObject) {
     // if exist then update, if not exist then add
+
+    let valueObj = this.messagesAnalyze[tag][0] || {};
+    if ( !valueObj.values ) {
+        valueObj["values"] = [];
+    }
+
     for (let key in sourceObject) {
         // skip loop if the property is from prototype
         if (!sourceObject.hasOwnProperty(key)) continue;
 
         let obj = {};
-        let findIndex = this.messagesAnalyze[tag].findIndex( cell => {
-                            return cell.name === key
+        let findIndex = valueObj.values.findIndex( cell => {
+                                return cell.x === key
                         });
-
         if ( findIndex === -1 ) {
-            obj["name"] = key;
-            obj["count"] = sourceObject[key];
-            obj["id"] = 0;
-            this.messagesAnalyze[tag].push(obj);
+            obj["x"] = key;
+            obj["y"] = sourceObject[key];
+            valueObj.values.push(obj);
         } else {
-            this.messagesAnalyze[tag][findIndex].count += sourceObject[key];
+            valueObj.values[findIndex].y += sourceObject[key];
         }
     }
-    // give every cell a id
-    let id = 0;
-    for (let index in this.messagesAnalyze[tag]) {
-        // skip loop if the property is from prototype
-        if (!this.messagesAnalyze[tag].hasOwnProperty(index)) continue;
-        
-        this.messagesAnalyze[tag][index].id = id
-        id = id + 1;
+    if (this.messagesAnalyze[tag][0]) {
+        this.messagesAnalyze[tag].pop();
     }
+    this.messagesAnalyze[tag].push(valueObj);
+
     // sort by count descending
-    this.messagesAnalyze[tag].sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
+    this.messagesAnalyze[tag][0].values.sort((a, b) => parseFloat(b.y) - parseFloat(a.y));
+
+    // test
+    if ( tag === "nouns" ) {
+        let arrayTemp = [];
+        let objTemp = {};
+        objTemp["values"] = this.messagesAnalyze[tag][0].values.slice(0, 10);
+        arrayTemp.push(objTemp);
+        this.setState({data: arrayTemp});
+    }
 
   }
 
   // Called every time a message comes in
   onMessageHandler (target, context, msg, self) {
-    if (self) { return; } // Ignore messages from the bot
+    //if (self) { return; } // Ignore messages from the bot
 
     // Remove whitespace from chat message
     const message = {
@@ -217,6 +228,7 @@ class TwitchIRC extends Component {
     axios(options)
     .then((res) => { 
         this.updateMessagesAnalyze(JSON.parse(res.data.message));
+        console.log(res.data.message);
         console.log(this.messagesAnalyze);
     })
     .catch((error) => { 
@@ -246,11 +258,37 @@ class TwitchIRC extends Component {
     return Math.floor(Math.random() * sides) + 1;
   }
 
+  messagesLoop() {
+    return Object.keys(this.messagesAnalyze);
+  }
+
+  get messagesBarChart() {
+
+    let keyArray = this.messagesLoop();
+    console.log(keyArray);
+    console.log(typeof keyArray);
+    let messagesObject = this.messagesAnalyze;
+    if ( this.props.isAuthenticated && this.props.enableLexicalAnalyzeService ) {
+        return (
+          <div>
+                { keyArray && keyArray.map(key => (
+                    <BarChartComponent data={messagesObject[key]}/>
+                )) }
+          </div>
+        );
+    } else {
+        return (
+            <p>messagesBarChart</p>
+        );
+    }
+  }
+
   render() {
     return (
         <div>
-            <MessageList messages={this.state.messages} />
-            <MessagesAnalyze messagesAnalyze={this.messagesAnalyze}/>
+            { this.state.data[0] && 
+            <BarChartComponent data={this.state.data}/>
+            }
         </div>
     )
   }

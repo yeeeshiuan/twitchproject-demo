@@ -74,13 +74,23 @@ def analyze(resp, login_type):
         sentence = tw2sp.convert(sentence)
         words = pseg.cut(sentence)
 
+        tempArray = []
+
         for word, flag in words:
+            # 一句話裡的字詞只有效一次
+            if word in tempArray:
+                continue
+
             if flag in nounFlags:
+                tempArray.append(word)
                 nouns[s2twp.convert(word)] = nouns.get(s2twp.convert(word), 0) + 1
             elif flag in verbFlags:
+                tempArray.append(word)
                 verbs[s2twp.convert(word)] = verbs.get(s2twp.convert(word), 0) + 1
             elif flag in adjFlags:
+                tempArray.append(word)
                 adjs[s2twp.convert(word)] = adjs.get(s2twp.convert(word), 0) + 1
+
             print(f'{word} {flag}', file=sys.stderr)
 
     result = {}
