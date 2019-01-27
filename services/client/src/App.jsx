@@ -58,6 +58,7 @@ class App extends Component {
       loginType: "normal",
       enableLexicalAnalyzeService: true,
       chartDataSelect: "nouns",
+      resetChartData: false,
     };
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
@@ -65,6 +66,7 @@ class App extends Component {
     this.loginUser = this.loginUser.bind(this);
     this.logoutUser = this.logoutUser.bind(this);
     this.changeChartDataSelect = this.changeChartDataSelect.bind(this);
+    this.resetChartData = this.resetChartData.bind(this);
   };
 
   componentWillMount() {
@@ -115,6 +117,10 @@ class App extends Component {
     const obj = {};
     obj[event.target.name] = event.target.value;
     this.setState(obj);
+  }
+
+  resetChartData(event) {
+    this.setState({resetChartData: !this.state.resetChartData});
   }
 
   render() {
@@ -173,6 +179,14 @@ class App extends Component {
                 </div>
             </div>
           }
+          { this.state.isAuthenticated &&
+            <div className="control">
+              <button className="button is-danger"
+                      onClick={this.resetChartData} 
+              >重置BarChart的data
+              </button>
+            </div>
+          }
         </div>
         <div className="flowLeft">
             <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
@@ -182,6 +196,7 @@ class App extends Component {
                      isAuthenticated={this.state.isAuthenticated}
                      enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
                      chartDataSelect={this.state.chartDataSelect}
+                     resetChartData={this.state.resetChartData}
           />
         </div>
         <Switch>

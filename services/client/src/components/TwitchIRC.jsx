@@ -29,7 +29,8 @@ class TwitchIRC extends Component {
     this.messagesAnalyze = {};
     /** My TMI client */
     this.myClient = null;
-
+    /** reset messagesAnalyze and data **/
+    this.resetChartData = false;
     /** Binding method **/
     this.onMessageHandler = this.onMessageHandler.bind(this);
 
@@ -41,6 +42,8 @@ class TwitchIRC extends Component {
       console.log(this.props.twitchIRCProps);
 
       this.chartDataSelect = this.props.chartDataSelect;
+
+      this.resetChartData = this.props.resetChartData;
 
       this.channel = `#${this.props.twitchIRCProps.channels[0]}`;
 
@@ -104,6 +107,11 @@ class TwitchIRC extends Component {
         } else {
             this.initBarChartData();
         }
+    }
+    // 初始化所有的messageAnalyz data
+    if (this.props.resetChartData !== this.resetChartData) {
+        this.resetChartData = this.props.resetChartData;
+        this.initMessagesAnalyze()
     }
   }
 
