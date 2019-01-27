@@ -4,14 +4,14 @@
 }
 
 .controlPanel {
-    height: 480px;
+    height: auto;
     width: 600px;
     float: left;
     border: 5px dashed #112322;
 }
 
 .chartPanel {
-    width: 860px;
+    width: auto;
     border: 5px dashed #841689;
 }
 

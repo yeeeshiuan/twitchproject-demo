@@ -92,15 +92,18 @@ class TwitchIRC extends Component {
     // 更新圖表資料的呈現類型
     if (this.props.chartDataSelect !== this.chartDataSelect) {
         this.chartDataSelect = this.props.chartDataSelect;
-
-        let temp = [];
-        if (this.messagesAnalyze[this.chartDataSelect][0]) {
+        
+        if (this.messagesAnalyze[this.chartDataSelect][0] && 
+            this.messagesAnalyze[this.chartDataSelect][0].values.length !== 0) {
+            console.log(this.messagesAnalyze[this.chartDataSelect][0].values.length);
+            let temp = [];
             let objTemp = {};
             objTemp["values"] = this.messagesAnalyze[this.chartDataSelect][0].values.slice(0, 10);
             temp.push(objTemp);
+            this.setState({data: temp});
+        } else {
+            this.initBarChartData();
         }
-
-        this.setState({data: temp});
     }
   }
 
@@ -109,6 +112,10 @@ class TwitchIRC extends Component {
     this.messagesAnalyze.verbs = [];
     this.messagesAnalyze.adjs = [];
 
+    this.initBarChartData();
+  }
+
+  initBarChartData() {
     // 初始化要餵給bar chart 的資料
     let data = []
     let obj = {};
@@ -163,11 +170,17 @@ class TwitchIRC extends Component {
 
     // test
     if ( tag === this.props.chartDataSelect ) {
-        let arrayTemp = [];
-        let objTemp = {};
-        objTemp["values"] = this.messagesAnalyze[tag][0].values.slice(0, 10);
-        arrayTemp.push(objTemp);
-        this.setState({data: arrayTemp});
+        if ( this.messagesAnalyze[tag][0] && 
+             this.messagesAnalyze[tag][0].values.length !== 0 ) {
+            let arrayTemp = [];
+            let objTemp = {};
+            objTemp["values"] = this.messagesAnalyze[tag][0].values.slice(0, 10);
+            arrayTemp.push(objTemp);
+            this.setState({data: arrayTemp});
+        } else {
+            this.initBarChartData();
+        }
+
     }
 
   }
