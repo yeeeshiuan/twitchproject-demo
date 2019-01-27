@@ -2,7 +2,6 @@ import React, { Component }  from "react";
 import { BarChart } from "react-d3-components";
 
 class BarChartComponent extends Component {
-
   // when curser on the bar, it will show the y value
   tooltip(x, y0, y, total) {
     return y.toString();

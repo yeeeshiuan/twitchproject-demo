@@ -8,6 +8,8 @@ import NavBar from './components/NavBar';
 import Logout from './components/Logout';
 import Footer from './components/Footer';
 
+import './style.css';
+
 class App extends Component {
   constructor() {
     super();
@@ -55,17 +57,15 @@ class App extends Component {
       // sso   : login by twitch or google SSO
       loginType: "normal",
       enableLexicalAnalyzeService: true,
+      chartDataSelect: "nouns",
     };
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
     this.handleChangeChannel = this.handleChangeChannel.bind(this);
     this.loginUser = this.loginUser.bind(this);
     this.logoutUser = this.logoutUser.bind(this);
+    this.changeChartDataSelect = this.changeChartDataSelect.bind(this);
   };
-
-  componentDidMount() {
-    
-  }
 
   componentWillMount() {
     if (window.localStorage.getItem('authToken')) {
@@ -111,6 +111,12 @@ class App extends Component {
     this.setState(obj);
   }
 
+  changeChartDataSelect(event) {
+    const obj = {};
+    obj[event.target.name] = event.target.value;
+    this.setState(obj);
+  }
+
   render() {
     return (
       <div>
@@ -119,33 +125,63 @@ class App extends Component {
           isAuthenticated={this.state.isAuthenticated}
           twitchOAuthImplicit={this.state.twitchOAuthImplicit}
         />
-        <div>
+        <div className="controlPanel">
+          <form onSubmit={(event) => this.changeChannel(event)}>
+            <div className="field">
+                <label className="label is-medium">目前頻道ID</label>
+            </div>
+            <div className="field has-addons">
+                <div className="control">
+                    <input
+                      name="channelName"
+                      className="input"
+                      type="text"
+                      placeholder="請輸入頻道ID"
+                      value={this.state.channelName}
+                      required
+                      onChange={this.handleChangeChannel}
+                    />
+                </div>
+                <div className="control">
+                    <input
+                      type="submit"
+                      className="button is-info"
+                      value="換頻道"
+                    />
+                </div>
+            </div>
+          </form>
+          <br />
+          { this.state.isAuthenticated &&
+            <div onChange={this.changeChartDataSelect}>
+                <div className="field">
+                    <label className="label is-medium">圖表資料類型(圖表資料每十筆留言才會做一次分詞服務)</label>
+                </div>
+                <div className="control">
+                  <label className="radio">
+                    <input type="radio" name="chartDataSelect" value="nouns" defaultChecked />
+                    名詞
+                  </label>
+                  <label className="radio">
+                    <input type="radio" name="chartDataSelect" value="verbs"  />
+                    動詞
+                  </label>
+                  <label className="radio">
+                    <input type="radio" name="chartDataSelect" value="adjs"  />
+                    形容詞
+                  </label>
+                </div>
+            </div>
+          }
+        </div>
+        <div className="flowLeft">
             <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
         </div>
-        <div>
-          <form onSubmit={(event) => this.changeChannel(event)}>
-            <input
-              name="channelName"
-              className="input is-large"
-              type="text"
-              placeholder="Enter channel name"
-              value={this.state.channelName}
-              required
-              onChange={this.handleChangeChannel}
-            />
-            <input
-              type="submit"
-              className="button is-primary is-large is-fullwidth"
-              value="Submit"
-            />
-          </form>
-        </div>
-          { this.loginTwitchButton }
-          { this.lexicalAuthTest }
-        <div>
+        <div className="chartPanel">
           <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
-                       isAuthenticated={this.state.isAuthenticated}
-                       enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
+                     isAuthenticated={this.state.isAuthenticated}
+                     enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
+                     chartDataSelect={this.state.chartDataSelect}
           />
         </div>
         <Switch>
@@ -162,7 +198,7 @@ class App extends Component {
               />
             )} />
         </Switch>
-        <Footer />
+        <Footer className="footerPanel" />
       </div>
     );
   }

@@ -23,7 +23,9 @@ class TwitchIRC extends Component {
     };
     /** channel **/
     this.channel = "";
-    /**  **/
+    /** chart data select status **/
+    this.chartDataSelect= "";
+    /** messages data analyze from lexical service **/
     this.messagesAnalyze = {};
     /** My TMI client */
     this.myClient = null;
@@ -37,6 +39,8 @@ class TwitchIRC extends Component {
     if (this.myClient === null) {
       //debug
       console.log(this.props.twitchIRCProps);
+
+      this.chartDataSelect = this.props.chartDataSelect;
 
       this.channel = `#${this.props.twitchIRCProps.channels[0]}`;
 
@@ -59,8 +63,7 @@ class TwitchIRC extends Component {
     }
   };
 
-
-  componentWillUpdate() {
+  componentDidUpdate() {
     // You don't have to do this check first, but it can help prevent an unneeded render
     if (this.props.twitchIRCProps.channels[0] !== this.channel) {
       this.channel =  `#${this.props.twitchIRCProps.channels[0]}`;
@@ -76,8 +79,9 @@ class TwitchIRC extends Component {
       // Connect to server
       this.myClient.connect();
 
-      // messagesQueue reset
-      this.setState({messagesQueue: new Queue()});
+      // messagesQueue and data reset
+      this.setState({messagesQueue: new Queue(),
+                     data: []});
 
       this.initMessagesAnalyze();
 
@@ -85,12 +89,36 @@ class TwitchIRC extends Component {
       console.log(this.props.twitchIRCProps.channels[0]);
       console.log(this.channel);
     }
+    // 更新圖表資料的呈現類型
+    if (this.props.chartDataSelect !== this.chartDataSelect) {
+        this.chartDataSelect = this.props.chartDataSelect;
+
+        let temp = [];
+        if (this.messagesAnalyze[this.chartDataSelect][0]) {
+            let objTemp = {};
+            objTemp["values"] = this.messagesAnalyze[this.chartDataSelect][0].values.slice(0, 10);
+            temp.push(objTemp);
+        }
+
+        this.setState({data: temp});
+    }
   }
 
   initMessagesAnalyze() {
     this.messagesAnalyze.nouns = [];
     this.messagesAnalyze.verbs = [];
     this.messagesAnalyze.adjs = [];
+
+    // 初始化要餵給bar chart 的資料
+    let data = []
+    let obj = {};
+    obj["values"] = [];
+    let item = {};
+    item["x"] = "初始化中";
+    item["y"] = 0;
+    obj.values.push(item);
+    data.push(obj);
+    this.setState({data: data});
   }
 
   updateMessagesAnalyze(resMessages) {
@@ -134,7 +162,7 @@ class TwitchIRC extends Component {
     this.messagesAnalyze[tag][0].values.sort((a, b) => parseFloat(b.y) - parseFloat(a.y));
 
     // test
-    if ( tag === "nouns" ) {
+    if ( tag === this.props.chartDataSelect ) {
         let arrayTemp = [];
         let objTemp = {};
         objTemp["values"] = this.messagesAnalyze[tag][0].values.slice(0, 10);
@@ -284,7 +312,7 @@ class TwitchIRC extends Component {
   render() {
     return (
         <div>
-            { this.state.data[0] && 
+            { this.state.data[0] && this.state.data[0].values.length !== 0 &&
             <BarChartComponent data={this.state.data}/>
             }
         </div>
