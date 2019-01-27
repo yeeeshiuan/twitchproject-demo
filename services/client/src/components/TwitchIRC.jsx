@@ -3,8 +3,6 @@ import ReactTMI from 'react-tmi';
 import axios from 'axios';
 import Queue from './Queue.js';
 
-import MessageList from './MessageList';
-import MessagesAnalyze from './MessagesAnalyze';
 import BarChartComponent from "./BarChartComponent";
 
 class TwitchIRC extends Component {

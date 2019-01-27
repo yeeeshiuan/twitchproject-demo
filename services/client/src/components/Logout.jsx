@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 
 class Logout extends Component {
 
@@ -10,7 +9,7 @@ class Logout extends Component {
   render() {
     return (
       <div>
-        <p>You are now logged out. Click <Link to="/login">here</Link> to log back in.</p>
+        <p>你已經登出。</p>
       </div>
     )
   };

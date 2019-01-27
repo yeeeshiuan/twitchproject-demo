@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import { Route, Switch } from 'react-router-dom';
 
 import TwitchIRC from './components/TwitchIRC';
 import TwitchEmbedVideo from './components/TwitchEmbedVideo';
 import AuthImplicit from './components/AuthImplicit';
+import NavBar from './components/NavBar';
 import Logout from './components/Logout';
+import Footer from './components/Footer';
 
 class App extends Component {
   constructor() {
@@ -46,6 +47,7 @@ class App extends Component {
           `${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
         ],
       },
+      title: 'TwitchProjectDemo',
       channelName:`${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
       twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_TWITCH_CALLBACK_URL}&response_type=token&scope=user_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
       isAuthenticated: false,
@@ -59,7 +61,6 @@ class App extends Component {
     this.handleChangeChannel = this.handleChangeChannel.bind(this);
     this.loginUser = this.loginUser.bind(this);
     this.logoutUser = this.logoutUser.bind(this);
-    this.authpingpon = this.authpingpon.bind(this);
   };
 
   componentDidMount() {
@@ -73,40 +74,6 @@ class App extends Component {
       });
     };
   };
-
-  authpingpon() {
-    const options = {
-        method: 'GET',
-        headers: {'Authorization': `Bearer ${window.localStorage.authToken}`,
-                  'LoginType': `${window.localStorage.loginType}`,
-        },
-        url: 'http://localhost/lexical/authping' //TODO
-    };
-    console.log(options);
-    axios(options)
-    .then((res) => { 
-        console.log(res.data);
-    })
-    .catch((error) => { 
-        // Error
-        if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-        } else if (error.request) {
-            // The request was made but no response was received
-            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-            // http.ClientRequest in node.js
-            console.log(error.request);
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
-        }
-        console.log(error.config);
-     });
-  }
 
   loginUser(token, loginType) {
     window.localStorage.setItem('authToken', token);
@@ -144,86 +111,58 @@ class App extends Component {
     this.setState(obj);
   }
 
-  get loginTwitchButton() {
-    let logoutURL = `${process.env.REACT_APP_DOMAIN_NAME_URL}/logout`
-    if (this.state.isAuthenticated === false) {
-        return (
-            <div>
-                <a href={this.state.twitchOAuthImplicit}>Login twitch</a>
-            </div>
-        );
-    } else {
-        return (
-            <div>
-                <a href={logoutURL}>Logout</a>
-            </div>
-        );
-    }
-  }
-
-  get lexicalAuthTest() {
-    return (
-      <div>
-        <button
-          onClick={event => {
-            event.preventDefault();
-            this.authpingpon();
-          }}
-        >
-          Get auth lexical ping
-        </button>
-      </div>
-    );
-  }
-
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <div>
-            <form onSubmit={(event) => this.changeChannel(event)}>
-              <input
-                name="channelName"
-                className="input is-large"
-                type="text"
-                placeholder="Enter channel name"
-                value={this.state.channelName}
-                required
-                onChange={this.handleChangeChannel}
-              />
-              <input
-                type="submit"
-                className="button is-primary is-large is-fullwidth"
-                value="Submit"
-              />
-            </form>
-          </div>
-          <div>
+      <div>
+        <NavBar
+          title={this.state.title}
+          isAuthenticated={this.state.isAuthenticated}
+          twitchOAuthImplicit={this.state.twitchOAuthImplicit}
+        />
+        <div>
             <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
-          </div>
+        </div>
+        <div>
+          <form onSubmit={(event) => this.changeChannel(event)}>
+            <input
+              name="channelName"
+              className="input is-large"
+              type="text"
+              placeholder="Enter channel name"
+              value={this.state.channelName}
+              required
+              onChange={this.handleChangeChannel}
+            />
+            <input
+              type="submit"
+              className="button is-primary is-large is-fullwidth"
+              value="Submit"
+            />
+          </form>
+        </div>
           { this.loginTwitchButton }
           { this.lexicalAuthTest }
-          <div>
-            <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
+        <div>
+          <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
                        isAuthenticated={this.state.isAuthenticated}
                        enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
-            />
-          </div>
-          <Switch>
-              <Route path="/authByTwitch" render={(props) => (
-                <AuthImplicit 
-                    loginUser={this.loginUser}
-                    {...props} 
-                />
-              )} />
-              <Route exact path='/logout' render={() => (
-                <Logout
-                  logoutUser={this.logoutUser}
-                  isAuthenticated={this.state.isAuthenticated}
-                />
-              )} />
-          </Switch>
-        </header>
+          />
+        </div>
+        <Switch>
+            <Route path="/authByTwitch" render={(props) => (
+              <AuthImplicit 
+                  loginUser={this.loginUser}
+                  {...props} 
+              />
+            )} />
+            <Route exact path='/logout' render={() => (
+              <Logout
+                logoutUser={this.logoutUser}
+                isAuthenticated={this.state.isAuthenticated}
+              />
+            )} />
+        </Switch>
+        <Footer />
       </div>
     );
   }
