@@ -179,11 +179,15 @@ class App extends Component {
                 </div>
             </div>
           }
+          <br />
           { this.state.isAuthenticated &&
             <div className="control">
+              <div className="field">
+                  <label className="label is-medium">重置BarChart的data</label>
+              </div>
               <button className="button is-danger"
                       onClick={this.resetChartData} 
-              >重置BarChart的data
+              >重置
               </button>
             </div>
           }

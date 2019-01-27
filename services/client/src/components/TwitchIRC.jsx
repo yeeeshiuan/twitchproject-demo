@@ -9,10 +9,6 @@ class TwitchIRC extends Component {
   constructor() {
     super();
     this.state = {
-      /** messages **/
-      messages:[],
-      messageCount: 0,
-      messageCountMax: 5,
       /** custom commands **/
       singleCommand: '!7777',
       /** messages queue **/
@@ -199,23 +195,8 @@ class TwitchIRC extends Component {
 
     // Remove whitespace from chat message
     const message = {
-      id: this.state.messageCount,
       text: msg.trim(),
     };
-
-    let messageCountTmp = this.state.messageCount;
-    if (messageCountTmp >= this.state.messageCountMax) {
-      messageCountTmp = 0;
-    } else {
-      messageCountTmp = messageCountTmp + 1;
-    }
-
-    let messagesTmp = [...this.state.messages];
-    // control the size of messages
-    if (messagesTmp.length >= this.state.messageCountMax) {
-      // remove older data
-      messagesTmp = messagesTmp.slice(1);
-    }
 
     this.state.messagesQueue.enqueue(message.text);
 
@@ -226,22 +207,8 @@ class TwitchIRC extends Component {
       this.myClient.say(target, `${num}`);
       console.log(`* Executed ${message.text} command`);
 
-      /* append new data */
-      messagesTmp.push(message);
-      this.setState({
-          messages: messagesTmp,
-          messageCount: messageCountTmp,
-      });
-
     } else {
       console.log(`* Unknown command ${message.text}`);
-
-      /* append new data */
-      messagesTmp.push(message);
-      this.setState({
-          messages: messagesTmp,
-          messageCount: messageCountTmp,
-      });
     }
 
     if ( this.props.isAuthenticated && this.props.enableLexicalAnalyzeService ) {
@@ -303,31 +270,6 @@ class TwitchIRC extends Component {
   rollDice () {
     const sides = 6;
     return Math.floor(Math.random() * sides) + 1;
-  }
-
-  messagesLoop() {
-    return Object.keys(this.messagesAnalyze);
-  }
-
-  get messagesBarChart() {
-
-    let keyArray = this.messagesLoop();
-    console.log(keyArray);
-    console.log(typeof keyArray);
-    let messagesObject = this.messagesAnalyze;
-    if ( this.props.isAuthenticated && this.props.enableLexicalAnalyzeService ) {
-        return (
-          <div>
-                { keyArray && keyArray.map(key => (
-                    <BarChartComponent data={messagesObject[key]}/>
-                )) }
-          </div>
-        );
-    } else {
-        return (
-            <p>messagesBarChart</p>
-        );
-    }
   }
 
   render() {
