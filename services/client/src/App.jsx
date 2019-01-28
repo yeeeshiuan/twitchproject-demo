@@ -78,8 +78,18 @@ class App extends Component {
 
   componentDidMount() {
     // if there is no channel there, get the top stream channel
-    if (!this.state.twitchIRCProps.channels.length) {
+    if (!window.localStorage.getItem('channelName')) {
         this.getTopStreamName();
+    } else {
+        let channelName = window.localStorage.getItem('channelName');
+        this.state.twitchIRCProps.channels.push(channelName);
+
+        let twitchEmbedVideoProps = this.state.twitchEmbedVideoProps;
+        twitchEmbedVideoProps.channel = channelName;
+
+        this.setState({channelName: channelName,
+                       twitchEmbedVideoProps:twitchEmbedVideoProps,
+        });
     }
   }
 
@@ -104,6 +114,7 @@ class App extends Component {
         this.setState({channelName: channelName,
                        twitchEmbedVideoProps:twitchEmbedVideoProps,
         });
+        window.localStorage.setItem('channelName', channelName);
     })
     .catch((error) => { 
         // Error
@@ -156,6 +167,7 @@ class App extends Component {
     obj.twitchIRCProps.channels.push(channelName);
     // update
     this.setState({...obj});
+    window.localStorage.setItem('channelName', channelName);
   }
 
   changeChannel(event) {
