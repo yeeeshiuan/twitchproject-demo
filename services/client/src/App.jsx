@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom';
+import axios from 'axios';
 
 import TwitchIRC from './components/TwitchIRC';
 import TwitchEmbedVideo from './components/TwitchEmbedVideo';
@@ -17,7 +18,7 @@ class App extends Component {
       twitchEmbedVideoProps:{
         /** Optional for VOD embeds; otherwise, required. 
             Name of the chat room and channel to stream. */
-        channel: `${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
+        channel: "",
         /** Width of video embed including chat */
         width: "940",
         /** Maximum width of the rendered element, in pixels. 
@@ -45,12 +46,10 @@ class App extends Component {
           username:`${process.env.REACT_APP_TWITCH_USER_NAME}` ,
           password:`${process.env.REACT_APP_TWITCH_OAUTH_TOKEN}`,
         },
-        channels: [
-          `${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
-        ],
+        channels: [],
       },
       title: 'TwitchProjectDemo',
-      channelName:`${process.env.REACT_APP_TWITCH_CHANNEL_NAME}`,
+      channelName: "",
       twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_TWITCH_CALLBACK_URL}&response_type=token&scope=user_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
       isAuthenticated: false,
       // normal: register by this site
@@ -76,6 +75,63 @@ class App extends Component {
       });
     };
   };
+
+  componentDidMount() {
+    // if there is no channel there, get the top stream channel
+    if (!this.state.twitchIRCProps.channels.length) {
+        this.getTopStreamName();
+    }
+  }
+
+  getTopStreamName() {
+
+    const options = {
+        method: 'GET',
+        headers: {'Accept': 'application/vnd.twitchtv.v5+json', //TODO
+                  'Client-ID': `${process.env.REACT_APP_TWITCH_CLIENT_ID}`,
+        },
+        url: `${process.env.REACT_APP_TWITCH_TOP_STREAM_API_URL}` //TODO
+    };
+
+    axios(options)
+    .then((res) => { 
+        let channelName = res.data.streams[0].channel.name;
+        this.state.twitchIRCProps.channels.push(channelName);
+
+        let twitchEmbedVideoProps = this.state.twitchEmbedVideoProps;
+        twitchEmbedVideoProps.channel = channelName;
+
+        this.setState({channelName: channelName,
+                       twitchEmbedVideoProps:twitchEmbedVideoProps,
+        });
+    })
+    .catch((error) => { 
+        // Error
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            
+            // user doesn't give twitch the auth
+            if (error.response.data.error === "Unauthorized") {
+                this.setState({twitchUnauthorized: true});
+                console.log("Twitch return error.(Unauthorized)");
+            }
+            
+        } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+        }
+        console.log(error.config);
+     });
+  }
 
   loginUser(token, loginType) {
     window.localStorage.setItem('authToken', token);
@@ -124,6 +180,10 @@ class App extends Component {
   }
 
   render() {
+    // if request not response, don't rendering
+    if (!this.state.twitchIRCProps.channels.length) {
+        return null;
+    }
     return (
       <div>
         <NavBar

@@ -125,7 +125,7 @@ class TwitchIRC extends Component {
     let obj = {};
     obj["values"] = [];
     let item = {};
-    item["x"] = "初始化中";
+    item["x"] = "無資料";
     item["y"] = 0;
     obj.values.push(item);
     data.push(obj);

@@ -43,9 +43,12 @@ class TwitchEmbedVideo extends Component {
         if (this.state.channel !== this.props.channel) {
             /** update temp channel **/
             this.setState({channel: this.props.channel});
-            /** remove old stream **/
+
             const mainDiv = document.getElementById(this.props.targetClass);
-            mainDiv.removeChild(mainDiv.childNodes[0]);
+            if (mainDiv.childNodes[0]) {
+                /** remove old stream if exist**/
+                mainDiv.removeChild(mainDiv.childNodes[0]);
+            }
             /** create new stream **/
             const script = document.createElement('script');
             script.setAttribute(
