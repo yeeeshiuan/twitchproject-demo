@@ -194,21 +194,31 @@ class TwitchIRC extends Component {
     //if (self) { return; } // Ignore messages from the bot
 
     // Remove whitespace from chat message
-    const message = {
-      text: msg.trim(),
+    const messageObj = {
+      badges: context["badges-raw"],
+      badgeObj: context.badges,
+      display_name: context["display-name"],
+      username: context.username,
+      user_id: context["user-id"],
+      room_id: context["room-id"],
+      tmi_sent_ts: context["tmi-sent-ts"],
+      message: msg.trim(),
+      keywords: [],
     };
 
-    this.state.messagesQueue.enqueue(message.text);
+    if ( this.props.isAuthenticated && this.props.enableLexicalAnalyzeService ) {
+        this.state.messagesQueue.enqueue(messageObj);
+    }
 
     // If the command is known, let's execute it
-    if (message.text === this.state.singleCommand) {
+    if (messageObj.message === this.state.singleCommand) {
       const num = this.rollDice();
       /** chat bot say something **/
       this.myClient.say(target, `${num}`);
-      console.log(`* Executed ${message.text} command`);
+      console.log(`* Executed ${messageObj.message} command`);
 
     } else {
-      console.log(`* Unknown command ${message.text}`);
+      console.log(`* Unknown command ${messageObj.message}`);
     }
 
     if ( this.props.isAuthenticated && this.props.enableLexicalAnalyzeService ) {
@@ -221,11 +231,14 @@ class TwitchIRC extends Component {
   makeLexicalAnalyzeService() {
 
     let messages = [];
+    let messagesObj = [];
 
     console.log(`Length before: ${this.state.messagesQueue.getLength()}`);
 
     for ( var i = 0; i <= this.state.messagesQueueMax - 1; i++) {
-        messages.push(this.state.messagesQueue.dequeue())
+        let messageObj = this.state.messagesQueue.dequeue();
+        messages.push(messageObj.message);
+        messagesObj.push(messageObj);
     }
 
     console.log(`Length after: ${this.state.messagesQueue.getLength()}`);
@@ -242,9 +255,50 @@ class TwitchIRC extends Component {
     axios(options)
     .then((res) => { 
         this.updateMessagesAnalyze(JSON.parse(res.data.keywords));
-        console.log(res.data.keywords);
+        // update messagesObj's keywords
+        if (this.props.enableRepository) {
+            let keywordsBySentence = JSON.parse(res.data.keywordsBySentence);
+            for (let i=0 ; i < (this.state.messagesQueueMax) ; i++) {
+                messagesObj[i].keywords = keywordsBySentence[i]
+            }
+            this.makeRepositoryService(messagesObj);
+        }
         console.log(this.messagesAnalyze);
-        console.log(messages);
+    })
+    .catch((error) => { 
+        // Error
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+        } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+        }
+        console.log(error.config);
+     });
+  }
+
+  makeRepositoryService(messagesObj) {
+    const options = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${window.localStorage.authToken}`,
+                  'LoginType': `${window.localStorage.loginType}`,
+        },
+        url: `${process.env.REACT_APP_DOMAIN_NAME_URL}/repository/update`,
+        data:{sentencesObj: messagesObj}
+    };
+    axios(options)
+    .then((res) => { 
+        console.log(res.data);
     })
     .catch((error) => { 
         // Error

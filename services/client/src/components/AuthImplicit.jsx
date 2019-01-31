@@ -82,12 +82,30 @@ class AuthImplicit extends Component {
         url: `${process.env.REACT_APP_DOMAIN_NAME_URL}/auth/twitchRegister`
     };
 
-    console.log(options);
-
     axios(options)
     .then((res) => { 
         console.log(res.data);
         this.props.loginUser(res.data.auth_token, "sso");
+        if (this.props.enableRepository && res.data.message === "Successfully registered.") {
+            this.createDatabaseForThisUser();
+        }
+    })
+    .catch((err) => { console.log(err); });
+  }
+
+  createDatabaseForThisUser() {
+    const options = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${window.localStorage.authToken}`,
+                  'LoginType': `${window.localStorage.loginType}`,
+        },
+        url: `${process.env.REACT_APP_DOMAIN_NAME_URL}/repository/createuser`
+    };
+
+    axios(options)
+    .then((res) => { 
+        console.log(res.data);
     })
     .catch((err) => { console.log(err); });
   }

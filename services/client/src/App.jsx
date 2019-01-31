@@ -56,6 +56,7 @@ class App extends Component {
       // sso   : login by twitch or google SSO
       loginType: "normal",
       enableLexicalAnalyzeService: true, // TODO
+      enableRepository: true, // TODO
       // nouns, adjs, verbs
       chartDataSelect: "nouns",
       resetChartData: false,
@@ -265,6 +266,7 @@ class App extends Component {
           <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
                      isAuthenticated={this.state.isAuthenticated}
                      enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
+                     enableRepository={this.state.enableRepository}
                      chartDataSelect={this.state.chartDataSelect}
                      resetChartData={this.state.resetChartData}
           />

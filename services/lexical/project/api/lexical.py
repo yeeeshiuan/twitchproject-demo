@@ -64,6 +64,8 @@ def analyze(resp, login_type):
     verbs = {}
     adjs = {}
 
+    keywordsBySentence = []
+
     # 分詞，並依照詞性填入對應的dict 中
     for sentence in sentences:
         print(f'sentence={sentence}, dataType={type(sentence)}', file=sys.stderr)
@@ -75,6 +77,7 @@ def analyze(resp, login_type):
         words = pseg.cut(sentence)
 
         tempArray = []
+        keywordsInSentence = []
 
         for word, flag in words:
             # 一句話裡的字詞只有效一次
@@ -83,15 +86,22 @@ def analyze(resp, login_type):
 
             if flag in nounFlags:
                 tempArray.append(word)
-                nouns[s2twp.convert(word)] = nouns.get(s2twp.convert(word), 0) + 1
+                wordTra = s2twp.convert(word)
+                nouns[wordTra] = nouns.get(wordTra, 0) + 1
+                keywordsInSentence.append(dict_factory(wordTra, flag))
             elif flag in verbFlags:
                 tempArray.append(word)
-                verbs[s2twp.convert(word)] = verbs.get(s2twp.convert(word), 0) + 1
+                wordTra = s2twp.convert(word)
+                verbs[wordTra] = verbs.get(wordTra, 0) + 1
+                keywordsInSentence.append(dict_factory(wordTra, flag))
             elif flag in adjFlags:
                 tempArray.append(word)
-                adjs[s2twp.convert(word)] = adjs.get(s2twp.convert(word), 0) + 1
+                wordTra = s2twp.convert(word)
+                adjs[wordTra] = adjs.get(wordTra, 0) + 1
+                keywordsInSentence.append(dict_factory(wordTra, flag))
 
-            print(f'{word} {flag}', file=sys.stderr)
+        keywordsBySentence.append(keywordsInSentence)
+        print(f'{keywordsInSentence}', file=sys.stderr)
 
     result = {}
     result["nouns"] = nouns
@@ -103,5 +113,13 @@ def analyze(resp, login_type):
     # to unicode coercion rules instead of being escaped to an ASCII str.
     return jsonify({
         'status': 'success',
-        'keywords': json.dumps(result, ensure_ascii=False)
+        'keywords': json.dumps(result, ensure_ascii=False),
+        'keywordsBySentence': json.dumps(keywordsBySentence, ensure_ascii=False)
     })
+
+
+def dict_factory(keyword, flag):
+    temp_dict = {}
+    temp_dict["keyword"] = keyword
+    temp_dict["keyword_type"] = flag
+    return temp_dict
