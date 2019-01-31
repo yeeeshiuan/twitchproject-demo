@@ -28,7 +28,7 @@ const NavBar = (props) => (
           <a href={props.twitchOAuthImplicit} className="navbar-item is-link">Log In By Twitch</a>
         }
         {props.isAuthenticated &&
-          <Link to="/logout" className="navbar-item">Log Out</Link>
+          <Link to="/logout" className="navbar-item">Log Out Here!</Link>
         }
         </div>
       </div>

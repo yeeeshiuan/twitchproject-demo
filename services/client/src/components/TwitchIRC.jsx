@@ -241,9 +241,10 @@ class TwitchIRC extends Component {
     };
     axios(options)
     .then((res) => { 
-        this.updateMessagesAnalyze(JSON.parse(res.data.message));
-        console.log(res.data.message);
+        this.updateMessagesAnalyze(JSON.parse(res.data.keywords));
+        console.log(res.data.keywords);
         console.log(this.messagesAnalyze);
+        console.log(messages);
     })
     .catch((error) => { 
         // Error

@@ -103,5 +103,5 @@ def analyze(resp, login_type):
     # to unicode coercion rules instead of being escaped to an ASCII str.
     return jsonify({
         'status': 'success',
-        'message': json.dumps(result, ensure_ascii=False)
+        'keywords': json.dumps(result, ensure_ascii=False)
     })

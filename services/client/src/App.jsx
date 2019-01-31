@@ -52,10 +52,11 @@ class App extends Component {
       channelName: "",
       twitchOAuthImplicit:`${process.env.REACT_APP_TWITCH_OAUTH_LINK}?client_id=${process.env.REACT_APP_TWITCH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_TWITCH_CALLBACK_URL}&response_type=token&scope=user_read&state=${process.env.REACT_APP_CSRF_TOKEN}`,
       isAuthenticated: false,
-      // normal: register by this site
+      // normal: register by this site (not yet)
       // sso   : login by twitch or google SSO
       loginType: "normal",
-      enableLexicalAnalyzeService: true,
+      enableLexicalAnalyzeService: true, // TODO
+      // nouns, adjs, verbs
       chartDataSelect: "nouns",
       resetChartData: false,
     };
@@ -77,19 +78,12 @@ class App extends Component {
   };
 
   componentDidMount() {
-    // if there is no channel there, get the top stream channel
+    // if there is no channel name there, get the top stream channel
     if (!window.localStorage.getItem('channelName')) {
         this.getTopStreamName();
     } else {
         let channelName = window.localStorage.getItem('channelName');
-        this.state.twitchIRCProps.channels.push(channelName);
-
-        let twitchEmbedVideoProps = this.state.twitchEmbedVideoProps;
-        twitchEmbedVideoProps.channel = channelName;
-
-        this.setState({channelName: channelName,
-                       twitchEmbedVideoProps:twitchEmbedVideoProps,
-        });
+        this.updateChannelName(channelName);
     }
   }
 
@@ -100,20 +94,13 @@ class App extends Component {
         headers: {'Accept': 'application/vnd.twitchtv.v5+json', //TODO
                   'Client-ID': `${process.env.REACT_APP_TWITCH_CLIENT_ID}`,
         },
-        url: `${process.env.REACT_APP_TWITCH_TOP_STREAM_API_URL}` //TODO
+        url: `${process.env.REACT_APP_TWITCH_TOP_STREAM_API_URL}`
     };
 
     axios(options)
     .then((res) => { 
         let channelName = res.data.streams[0].channel.name;
-        this.state.twitchIRCProps.channels.push(channelName);
-
-        let twitchEmbedVideoProps = this.state.twitchEmbedVideoProps;
-        twitchEmbedVideoProps.channel = channelName;
-
-        this.setState({channelName: channelName,
-                       twitchEmbedVideoProps:twitchEmbedVideoProps,
-        });
+        this.updateChannelName(channelName);
         window.localStorage.setItem('channelName', channelName);
     })
     .catch((error) => { 
@@ -158,15 +145,20 @@ class App extends Component {
   };
 
   updateChannelName(channelName) {
-    // update channel
-    const obj = this.state;
-    obj.twitchEmbedVideoProps.channel = channelName;
-    // remove old channel
-    obj.twitchIRCProps.channels.pop();
-    // add new channel
-    obj.twitchIRCProps.channels.push(channelName);
-    // update
-    this.setState({...obj});
+    let twitchIRCProps = this.state.twitchIRCProps;
+    if ( twitchIRCProps.channels.length ) {
+        twitchIRCProps.channels.pop();
+    }
+    twitchIRCProps.channels.push(channelName);
+
+    let twitchEmbedVideoProps = this.state.twitchEmbedVideoProps;
+    twitchEmbedVideoProps.channel = channelName;
+
+    this.setState({channelName: channelName,
+                   twitchIRCProps: twitchIRCProps,
+                   twitchEmbedVideoProps:twitchEmbedVideoProps,
+    });
+
     window.localStorage.setItem('channelName', channelName);
   }
 
@@ -206,7 +198,7 @@ class App extends Component {
         <div className="controlPanel">
           <form onSubmit={(event) => this.changeChannel(event)}>
             <div className="field">
-                <label className="label is-medium">目前頻道ID</label>
+                <label className="label is-medium">頻道ID</label>
             </div>
             <div className="field has-addons">
                 <div className="control">
@@ -233,7 +225,9 @@ class App extends Component {
           { this.state.isAuthenticated &&
             <div onChange={this.changeChartDataSelect}>
                 <div className="field">
-                    <label className="label is-medium">圖表資料類型(圖表資料每十筆留言才會做一次分詞服務)</label>
+                    <label className="label is-medium">圖表資料類型(每十筆留言才會做一次分詞服務[採用
+                        <a href="https://github.com/fxsjy/jieba" target="_blank" rel="noopener noreferrer">jieba</a>])
+                    </label>
                 </div>
                 <div className="control">
                   <label className="radio">

@@ -69,4 +69,32 @@ services:
       - SECRET_KEY=my_precious
     depends_on:
       - users
-
+  repository:
+    build:
+      context: ./services/repository
+      dockerfile: Dockerfile-dev
+    volumes:
+      - './services/repository:/usr/src/app'
+    ports:
+      - 5007:5000
+    environment:
+      - FLASK_ENV=development
+      - APP_SETTINGS=project.config.DevelopmentConfig
+      - MONGO_URI=mongodb://mongodb:mongodb@mongo-db:27017
+      - MONGO_TEST_URI=mongodb://mongodb:mongodb@mongo-db:27017/test
+      - SECRET_KEY=my_precious
+      - USERS_SERVICE_URL=http://users:5000
+    depends_on:
+      - users
+      - mongo-db
+  mongo-db:
+    build:
+      context: ./services/repository/project/db
+      dockerfile: Dockerfile
+    volumes:
+      - './db:/data/db'
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=mongodb
