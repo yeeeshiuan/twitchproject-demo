@@ -8,6 +8,7 @@ import AuthImplicit from './components/AuthImplicit';
 import NavBar from './components/NavBar';
 import Logout from './components/Logout';
 import Footer from './components/Footer';
+import MessageList from './components/MessageList';
 
 import './style.css';
 
@@ -60,14 +61,24 @@ class App extends Component {
       // nouns, adjs, verbs
       chartDataSelect: "nouns",
       resetChartData: false,
+      findSentencesByUsername: "",
+      findSentencesByDisplay_name: "",
+      findDisplay_namesByKeyword: "",
+      findDisplay_namesBySentence: "",
+      findingResult: [],
     };
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
-    this.handleChangeChannel = this.handleChangeChannel.bind(this);
+    this.handleChangeEvent = this.handleChangeEvent.bind(this);
     this.loginUser = this.loginUser.bind(this);
     this.logoutUser = this.logoutUser.bind(this);
     this.changeChartDataSelect = this.changeChartDataSelect.bind(this);
     this.resetChartData = this.resetChartData.bind(this);
+
+    this.findSentencesByUsername = this.findSentencesByUsername.bind(this);
+    this.findSentencesByDisplay_name = this.findSentencesByDisplay_name.bind(this);
+    this.findDisplay_namesByKeyword = this.findDisplay_namesByKeyword.bind(this);
+    this.findDisplay_namesBySentence = this.findDisplay_namesBySentence.bind(this);
   };
 
   componentWillMount() {
@@ -103,6 +114,49 @@ class App extends Component {
         let channelName = res.data.streams[0].channel.name;
         this.updateChannelName(channelName);
         window.localStorage.setItem('channelName', channelName);
+    })
+    .catch((error) => { 
+        // Error
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            
+            // user doesn't give twitch the auth
+            if (error.response.data.error === "Unauthorized") {
+                this.setState({twitchUnauthorized: true});
+                console.log("Twitch return error.(Unauthorized)");
+            }
+            
+        } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+        }
+        console.log(error.config);
+     });
+  }
+
+  repositoryFindRequest(partURI) {
+    const options = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${window.localStorage.authToken}`,
+                  'LoginType': `${window.localStorage.loginType}`,
+        },
+        url: `${process.env.REACT_APP_DOMAIN_NAME_URL}/repository${partURI}`,
+    };
+
+    axios(options)
+    .then((res) => { 
+        console.log(res.data);
+        this.setState({findingResult: res.data.message});
     })
     .catch((error) => { 
         // Error
@@ -168,10 +222,35 @@ class App extends Component {
     this.updateChannelName(this.state.channelName);
   }
 
-  handleChangeChannel(event) {
+  handleChangeEvent(event) {
     const obj = {};
     obj[event.target.name] = event.target.value;
     this.setState(obj);
+  }
+
+  findSentencesByUsername(event) {
+    event.preventDefault();
+    let partURI = "/findSentencesByUsername/" + this.state.findSentencesByUsername;
+    this.repositoryFindRequest(partURI);
+  }
+
+  findSentencesByDisplay_name(event) {
+    event.preventDefault();
+    let partURI = "/findSentencesByDisplayname/" + this.state.findSentencesByDisplay_name;
+    this.repositoryFindRequest(partURI);
+  }
+
+  findDisplay_namesByKeyword(event) {
+    event.preventDefault();
+    let partURI = "/findDisplaynamesByKeyword/" + this.state.findDisplay_namesByKeyword;
+    this.repositoryFindRequest(partURI);
+  }
+
+  findDisplay_namesBySentence(event) {
+    event.preventDefault();
+    let partURI = "/findDisplaynamesBySentence/" + this.state.findDisplay_namesBySentence;
+    this.repositoryFindRequest(partURI);
+
   }
 
   changeChartDataSelect(event) {
@@ -199,7 +278,7 @@ class App extends Component {
         <div className="controlPanel">
           <form onSubmit={(event) => this.changeChannel(event)}>
             <div className="field">
-                <label className="label is-medium">頻道ID</label>
+                <label className="label">頻道ID</label>
             </div>
             <div className="field has-addons">
                 <div className="control">
@@ -210,7 +289,7 @@ class App extends Component {
                       placeholder="請輸入頻道ID"
                       value={this.state.channelName}
                       required
-                      onChange={this.handleChangeChannel}
+                      onChange={this.handleChangeEvent}
                     />
                 </div>
                 <div className="control">
@@ -222,11 +301,10 @@ class App extends Component {
                 </div>
             </div>
           </form>
-          <br />
           { this.state.isAuthenticated &&
             <div onChange={this.changeChartDataSelect}>
                 <div className="field">
-                    <label className="label is-medium">圖表資料類型(每十筆留言才會做一次分詞服務[採用
+                    <label className="label">圖表資料類型(每十筆留言才會做一次分詞服務[採用
                         <a href="https://github.com/fxsjy/jieba" target="_blank" rel="noopener noreferrer">jieba</a>])
                     </label>
                 </div>
@@ -246,31 +324,146 @@ class App extends Component {
                 </div>
             </div>
           }
-          <br />
           { this.state.isAuthenticated &&
-            <div className="control">
-              <div className="field">
-                  <label className="label is-medium">重置BarChart的data</label>
-              </div>
-              <button className="button is-danger"
-                      onClick={this.resetChartData} 
-              >重置
-              </button>
+          <div className="control">
+            <div className="field">
+                <label className="label">重置BarChart的data</label>
             </div>
+            <button className="button is-danger is-small"
+                    onClick={this.resetChartData} 
+            >重置
+            </button>
+          </div>
+          }
+          { this.state.isAuthenticated &&
+          <form onSubmit={(event) => this.findSentencesByUsername(event)}>
+            <div className="field">
+                <label className="label">用ID找發言</label>
+            </div>
+            <div className="field has-addons">
+                <div className="control">
+                    <input
+                      name="findSentencesByUsername"
+                      className="input"
+                      type="text"
+                      placeholder="請輸入留言者ID"
+                      value={this.state.findSentencesByUsername}
+                      required
+                      onChange={this.handleChangeEvent}
+                    />
+                </div>
+                <div className="control">
+                    <input
+                      type="submit"
+                      className="button is-info"
+                      value="尋找"
+                    />
+                </div>
+            </div>
+          </form>
+          }
+          { this.state.isAuthenticated &&
+          <form onSubmit={(event) => this.findSentencesByDisplay_name(event)}>
+            <div className="field">
+                <label className="label">用名稱找發言</label>
+            </div>
+            <div className="field has-addons">
+                <div className="control">
+                    <input
+                      name="findSentencesByDisplay_name"
+                      className="input"
+                      type="text"
+                      placeholder="請輸入留言者名稱"
+                      value={this.state.findSentencesByDisplay_name}
+                      required
+                      onChange={this.handleChangeEvent}
+                    />
+                </div>
+                <div className="control">
+                    <input
+                      type="submit"
+                      className="button is-info"
+                      value="尋找"
+                    />
+                </div>
+            </div>
+          </form>
+          }
+          { this.state.isAuthenticated &&
+          <form onSubmit={(event) => this.findDisplay_namesByKeyword(event)}>
+            <div className="field">
+                <label className="label">用分詞找發言人名稱</label>
+            </div>
+            <div className="field has-addons">
+                <div className="control">
+                    <input
+                      name="findDisplay_namesByKeyword"
+                      className="input"
+                      type="text"
+                      placeholder="請輸入分詞"
+                      value={this.state.findDisplay_namesByKeyword}
+                      required
+                      onChange={this.handleChangeEvent}
+                    />
+                </div>
+                <div className="control">
+                    <input
+                      type="submit"
+                      className="button is-info"
+                      value="尋找"
+                    />
+                </div>
+            </div>
+          </form>
+          }
+          { this.state.isAuthenticated &&
+          <form onSubmit={(event) => this.findDisplay_namesBySentence(event)}>
+            <div className="field">
+                <label className="label">用完整的句子找發言人名稱</label>
+            </div>
+            <div className="field has-addons">
+                <div className="control">
+                    <input
+                      name="findDisplay_namesBySentence"
+                      className="input"
+                      type="text"
+                      placeholder="請輸入完整的句子"
+                      value={this.state.findDisplay_namesBySentence}
+                      required
+                      onChange={this.handleChangeEvent}
+                    />
+                </div>
+                <div className="control">
+                    <input
+                      type="submit"
+                      className="button is-info"
+                      value="尋找"
+                    />
+                </div>
+            </div>
+          </form>
           }
         </div>
         <div className="flowLeft">
             <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
         </div>
-        <div className="chartPanel">
-          <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
-                     isAuthenticated={this.state.isAuthenticated}
-                     enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
-                     enableRepository={this.state.enableRepository}
-                     chartDataSelect={this.state.chartDataSelect}
-                     resetChartData={this.state.resetChartData}
-          />
+        { this.state.isAuthenticated &&
+        <div>
+            <div className="chartPanel">
+              <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
+                         isAuthenticated={this.state.isAuthenticated}
+                         enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
+                         enableRepository={this.state.enableRepository}
+                         chartDataSelect={this.state.chartDataSelect}
+                         resetChartData={this.state.resetChartData}
+              />
+            </div>
+            <div className="searchPanel">
+                <p>{this.state.findingResult.length}</p>
+                <MessageList findingResult={this.state.findingResult} />
+            </div>
         </div>
+        }
         <Switch>
             <Route path="/authByTwitch" render={(props) => (
               <AuthImplicit 

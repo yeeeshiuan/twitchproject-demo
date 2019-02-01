@@ -5,18 +5,20 @@
 
 .controlPanel {
     height: auto;
-    width: 600px;
+    width: 630px;
     float: left;
     border: 5px dashed #112322;
 }
 
 .chartPanel {
     width: auto;
+    float: left;
     border: 5px dashed #841689;
 }
 
 
 .searchPanel {
+
     border: 5px dashed #990022;
 }
 
