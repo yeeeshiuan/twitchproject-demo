@@ -167,15 +167,15 @@ def update(resp, login_type):
                                             "display_name": sentenceObj["display_name"]}}, 
                                    upsert=True)
         usersCollection.update_one(userKey,
-                                   {"$addToSet": {"tmi_sent_ts": sentenceObj["tmi_sent_ts"]}})
+                                   {"$push": {"tmi_sent_ts": sentenceObj["tmi_sent_ts"],
+                                                  "room_id": sentenceObj["room_id"]}})
 
         messageKeyId = None
         cursor = messagesCollection.find_one({"message":sentenceObj["message"]})
         if cursor:
             messageKeyId = cursor["_id"]
         else:
-            cursor = messagesCollection.insert_one({"room_id": sentenceObj["room_id"],
-                                                    "message": sentenceObj["message"]})
+            cursor = messagesCollection.insert_one({"message": sentenceObj["message"]})
             messageKeyId = cursor.inserted_id
 
         usersCollection.update_one(userKey, 
@@ -242,6 +242,7 @@ def findSentencesByUsername(resp, login_type, username):
         messageObj = {}
         message = messagesCollection.find_one({"_id": message_id})
         messageObj["message"] = message["message"]
+        messageObj["room_id"] = userObj["room_id"]
         messageObj["tmi_sent_ts"] = userObj["tmi_sent_ts"][index]
         messageObj["id"] = index
         messagesObj.append(messageObj)
@@ -293,6 +294,7 @@ def findSentencesByDisplayname(resp, login_type, display_name):
         messageObj = {}
         message = messagesCollection.find_one({"_id": message_id})
         messageObj["message"] = message["message"]
+        messageObj["room_id"] = userObj["room_id"]
         messageObj["tmi_sent_ts"] = userObj["tmi_sent_ts"][index]
         messageObj["id"] = index
         messagesObj.append(messageObj)

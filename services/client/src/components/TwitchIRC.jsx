@@ -206,6 +206,10 @@ class TwitchIRC extends Component {
       keywords: [],
     };
 
+    if (!window.localStorage.getItem(messageObj["room_id"])) {
+      this.props.updateRoomID(messageObj["room_id"]);
+    };
+
     if ( this.props.isAuthenticated && this.props.enableLexicalAnalyzeService ) {
         this.state.messagesQueue.enqueue(messageObj);
     }

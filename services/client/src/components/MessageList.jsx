@@ -3,10 +3,15 @@ import React, { Component } from 'react';
 class MessageList extends Component {
 
   get data() {
-    return (this.props.findingResult.map(result => {
+    return (this.props.findingResult.map((result, index) => {
               let main = "";
               if (result.display_name) {
                 main = result.display_name;
+                  return (
+                           <li key={result.id}>
+                               {main}
+                           </li>
+                  )
               } else {
                 let time = new Date(parseInt(result.tmi_sent_ts));
                 let options = { weekday:'long', 
@@ -17,14 +22,16 @@ class MessageList extends Component {
                                 minute: '2-digit', 
                                 second: '2-digit',
                                 hour12: false};
-                main = time.toLocaleDateString("zh-TW", options) + ' : ' + result.message;
-                
-              }
+                let roomDisplayName = window.localStorage.getItem(result.room_id[index]);
+                main = roomDisplayName + ' (' + time.toLocaleDateString("zh-TW", options) + ') : ';
+                let message = result.message;
+
                   return (
                            <li key={result.id}>
-                               {main}
+                               {main} <br /> {message}
                            </li>
                   )
+              }
         }))
   }
 

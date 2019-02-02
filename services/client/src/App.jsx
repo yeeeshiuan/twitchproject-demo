@@ -74,6 +74,7 @@ class App extends Component {
     this.logoutUser = this.logoutUser.bind(this);
     this.changeChartDataSelect = this.changeChartDataSelect.bind(this);
     this.resetChartData = this.resetChartData.bind(this);
+    this.updateRoomID = this.updateRoomID.bind(this);
 
     this.findSentencesByUsername = this.findSentencesByUsername.bind(this);
     this.findSentencesByDisplay_name = this.findSentencesByDisplay_name.bind(this);
@@ -157,6 +158,49 @@ class App extends Component {
     .then((res) => { 
         console.log(res.data);
         this.setState({findingResult: res.data.message});
+    })
+    .catch((error) => { 
+        // Error
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            
+            // user doesn't give twitch the auth
+            if (error.response.data.error === "Unauthorized") {
+                this.setState({twitchUnauthorized: true});
+                console.log("Twitch return error.(Unauthorized)");
+            }
+            
+        } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+        }
+        console.log(error.config);
+        this.setState({findingResult: []});
+     });
+  }
+
+  updateRoomID(roomId) {
+    const options = {
+        method: 'GET',
+        headers: {'Accept': 'application/vnd.twitchtv.v5+json', //TODO
+                  'Client-ID': `${process.env.REACT_APP_TWITCH_CLIENT_ID}`,
+        },
+        url: 'https://api.twitch.tv/kraken/channels/' + roomId //TODO
+    };
+
+    axios(options)
+    .then((res) => { 
+        let channelName = res.data.status;
+        window.localStorage.setItem(roomId, channelName);
     })
     .catch((error) => { 
         // Error
@@ -454,6 +498,7 @@ class App extends Component {
                      enableRepository={this.state.enableRepository}
                      chartDataSelect={this.state.chartDataSelect}
                      resetChartData={this.state.resetChartData}
+                     updateRoomID={this.updateRoomID}
           />
         </div>
         <div className="searchPanel">
