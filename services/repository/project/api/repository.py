@@ -166,6 +166,8 @@ def update(resp, login_type):
                                             "badges": sentenceObj["badges"], 
                                             "display_name": sentenceObj["display_name"]}}, 
                                    upsert=True)
+        usersCollection.update_one(userKey,
+                                   {"$addToSet": {"tmi_sent_ts": sentenceObj["tmi_sent_ts"]}})
 
         messageKeyId = None
         cursor = messagesCollection.find_one({"message":sentenceObj["message"]})
@@ -173,7 +175,6 @@ def update(resp, login_type):
             messageKeyId = cursor["_id"]
         else:
             cursor = messagesCollection.insert_one({"room_id": sentenceObj["room_id"],
-                                                    "tmi_sent_ts": sentenceObj["tmi_sent_ts"], 
                                                     "message": sentenceObj["message"]})
             messageKeyId = cursor.inserted_id
 
@@ -241,11 +242,9 @@ def findSentencesByUsername(resp, login_type, username):
         messageObj = {}
         message = messagesCollection.find_one({"_id": message_id})
         messageObj["message"] = message["message"]
-        messageObj["tmi_sent_ts"] = message["tmi_sent_ts"]
+        messageObj["tmi_sent_ts"] = userObj["tmi_sent_ts"][index]
         messageObj["id"] = index
         messagesObj.append(messageObj)
-
-    sortedMessagesObj = sorted(messagesObj, key=lambda k: k['tmi_sent_ts'])
 
     userClient.close()
 
@@ -257,7 +256,7 @@ def findSentencesByUsername(resp, login_type, username):
     else:
         return jsonify({
             'status': 'success',
-            'message': sortedMessagesObj,
+            'message': messagesObj,
         })
 
 
@@ -294,11 +293,9 @@ def findSentencesByDisplayname(resp, login_type, display_name):
         messageObj = {}
         message = messagesCollection.find_one({"_id": message_id})
         messageObj["message"] = message["message"]
-        messageObj["tmi_sent_ts"] = message["tmi_sent_ts"]
+        messageObj["tmi_sent_ts"] = userObj["tmi_sent_ts"][index]
         messageObj["id"] = index
         messagesObj.append(messageObj)
-
-    sortedMessagesObj = sorted(messagesObj, key=lambda k: k['tmi_sent_ts'])
 
     userClient.close()
 
@@ -310,7 +307,7 @@ def findSentencesByDisplayname(resp, login_type, display_name):
     else:
         return jsonify({
             'status': 'success',
-            'message': sortedMessagesObj,
+            'message': messagesObj,
         })
 
 

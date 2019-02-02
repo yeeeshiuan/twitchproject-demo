@@ -447,27 +447,23 @@ class App extends Component {
         <div className="flowLeft">
             <TwitchEmbedVideo {...this.state.twitchEmbedVideoProps} />
         </div>
-        { this.state.isAuthenticated &&
-        <div>
-            <div className="chartPanel">
-              <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
-                         isAuthenticated={this.state.isAuthenticated}
-                         enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
-                         enableRepository={this.state.enableRepository}
-                         chartDataSelect={this.state.chartDataSelect}
-                         resetChartData={this.state.resetChartData}
-              />
-            </div>
-            <div className="searchPanel">
-                <p>{this.state.findingResult.length}</p>
-                <MessageList findingResult={this.state.findingResult} />
-            </div>
+        <div className="chartPanel">
+          <TwitchIRC twitchIRCProps={this.state.twitchIRCProps} 
+                     isAuthenticated={this.state.isAuthenticated}
+                     enableLexicalAnalyzeService={this.state.enableLexicalAnalyzeService}
+                     enableRepository={this.state.enableRepository}
+                     chartDataSelect={this.state.chartDataSelect}
+                     resetChartData={this.state.resetChartData}
+          />
         </div>
-        }
+        <div className="searchPanel">
+            <MessageList findingResult={this.state.findingResult} />
+        </div>
         <Switch>
             <Route path="/authByTwitch" render={(props) => (
               <AuthImplicit 
                   loginUser={this.loginUser}
+                  enableRepository={this.state.enableRepository}
                   {...props} 
               />
             )} />

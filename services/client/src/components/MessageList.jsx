@@ -33,7 +33,10 @@ class MessageList extends Component {
     return (
             <div>
             { result > 0 ? (
-              this.data
+              <ul>
+              <li>筆數： {result}</li>
+              {this.data}
+              </ul>
             ) : (
               <i>目前沒有資料。</i>
             )}

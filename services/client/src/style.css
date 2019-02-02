@@ -18,7 +18,9 @@
 
 
 .searchPanel {
-
+    height: 200px;
+    width: 725px;
+    overflow-y: scroll;
     border: 5px dashed #990022;
 }
 
