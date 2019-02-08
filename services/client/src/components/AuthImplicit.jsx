@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import queryString from 'query-string';
+import qs from 'query-string';
 import axios from 'axios';
 
 class AuthImplicit extends Component {
@@ -14,7 +14,7 @@ class AuthImplicit extends Component {
 
   componentDidMount() {
     /** get params from url fragment **/
-    let params = queryString.parse(this.props.location.hash);
+    let params = qs.parse(this.props.location.hash);
     this.getUserReference(params.access_token, params.state);
   }
 

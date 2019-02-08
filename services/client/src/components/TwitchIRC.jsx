@@ -237,15 +237,11 @@ class TwitchIRC extends Component {
     let messages = [];
     let messagesObj = [];
 
-    console.log(`Length before: ${this.state.messagesQueue.getLength()}`);
-
     for ( var i = 0; i <= this.state.messagesQueueMax - 1; i++) {
         let messageObj = this.state.messagesQueue.dequeue();
         messages.push(messageObj.message);
         messagesObj.push(messageObj);
     }
-
-    console.log(`Length after: ${this.state.messagesQueue.getLength()}`);
 
     const options = {
         method: 'POST',
@@ -267,6 +263,7 @@ class TwitchIRC extends Component {
             }
             this.makeRepositoryService(messagesObj);
         }
+        console.log(JSON.parse(res.data.keywords));
         console.log(this.messagesAnalyze);
     })
     .catch((error) => { 

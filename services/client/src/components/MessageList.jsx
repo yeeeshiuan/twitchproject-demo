@@ -22,7 +22,10 @@ class MessageList extends Component {
                                 minute: '2-digit', 
                                 second: '2-digit',
                                 hour12: false};
-                let roomDisplayName = window.localStorage.getItem(result.room_id[index]);
+                let roomDisplayName = result.room_id[index]
+                if ( window.localStorage.getItem(result.room_id[index])) {
+                    roomDisplayName = window.localStorage.getItem(result.room_id[index]);
+                }
                 main = roomDisplayName + ' (' + time.toLocaleDateString("zh-TW", options) + ') : ';
                 let message = result.message;
 

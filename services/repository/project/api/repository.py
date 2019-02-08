@@ -67,7 +67,7 @@ def create_user(resp, login_type):
 def insert_one(resp, login_type):
 
     name = checkUsername(resp)
-    userClient = MongoClient(f"mongodb://{name}:{name}@mongo-db:27017/{name}")
+    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
     db = userClient[name]
     asdfCollection = db["asdf"]
 
@@ -103,7 +103,7 @@ def find_one(resp, login_type):
         })
 
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@mongo-db:27017/{name}")
+    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
     db = userClient[name]
     asdfCollection = db["asdf"]
 
@@ -152,7 +152,7 @@ def update(resp, login_type):
     if not isinstance(sentencesObj, list):
         return jsonify(response_object), 400
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@mongo-db:27017/{name}")
+    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     messagesCollection = db["messages"]
@@ -220,7 +220,7 @@ def findSentencesByUsername(resp, login_type, username):
             'message': 'Internal server error'
         }), 400
     
-    userClient = MongoClient(f"mongodb://{name}:{name}@mongo-db:27017/{name}")
+    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     messagesCollection = db["messages"]
@@ -272,7 +272,7 @@ def findSentencesByDisplayname(resp, login_type, display_name):
             'message': 'Internal server error'
         }), 400
     
-    userClient = MongoClient(f"mongodb://{name}:{name}@mongo-db:27017/{name}")
+    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     messagesCollection = db["messages"]
@@ -324,7 +324,7 @@ def findDisplaynamesByKeyword(resp, login_type, keyword):
             'message': 'Internal server error'
         }), 400
     
-    userClient = MongoClient(f"mongodb://{name}:{name}@mongo-db:27017/{name}")
+    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     keywordsCollection = db["keywords"]
@@ -367,7 +367,7 @@ def findDisplaynamesBySentence(resp, login_type, sentence):
             'message': 'Internal server error'
         }), 400
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@mongo-db:27017/{name}")
+    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     messagesCollection = db["messages"]
