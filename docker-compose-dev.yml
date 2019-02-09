@@ -35,6 +35,8 @@ services:
     build:
       context: ./services/users
       dockerfile: Dockerfile-dev
+    volumes:
+      - './services/users:/usr/src/app'
     expose:
       - 5000
     environment:
@@ -75,19 +77,20 @@ services:
       dockerfile: Dockerfile-dev
     volumes:
       - './services/repository:/usr/src/app'
-    ports:
-      - 5007:5000
+    expose:
+      - 5000
     environment:
       - FLASK_ENV=development
       - APP_SETTINGS=project.config.DevelopmentConfig
-      - MONGO_URI=mongodb://mongodb:mongodb@mongo-db:27017
-      - MONGO_TEST_URI=mongodb://mongodb:mongodb@mongo-db:27017/test
+      - MONGO_URI=mongodb://mongodb:mongodb@repository-db:27017
+      - MONGO_TEST_URI=mongodb://mongodb:mongodb@repository-db:27017/test
       - SECRET_KEY=my_precious
       - USERS_SERVICE_URL=http://users:5000
+      - REPOSITORY_URI=repository-db:27017
     depends_on:
       - users
-      - mongo-db
-  mongo-db:
+      - repository-db
+  repository-db:
     build:
       context: ./services/repository/project/db
       dockerfile: Dockerfile

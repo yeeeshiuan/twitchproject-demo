@@ -1,17 +1,8 @@
 from project import db
-from project.api.models import User
+from project.api.models import UserSSO
 
-def add_user(username, email, password):
-    user = User(username=username, email=email, password=password)
-    db.session.add(user)
-    db.session.commit()
-    return user
-
-def add_admin(username, email, password):
-    user = User(
-      username=username, email=email,
-      password=password, admin=True
-    )
+def add_usersso(username, email, picture, twitch_id=""):
+    user = UserSSO(username=username, email=email, picture=picture, twitch_id=twitch_id)
     db.session.add(user)
     db.session.commit()
     return user

@@ -2,7 +2,7 @@ from functools import wraps
 from flask import request, jsonify
 import sys
 
-from project.api.models import User, UserSSO
+from project.api.models import UserSSO
 
 
 def authenticate(f):
@@ -24,28 +24,16 @@ def authenticate(f):
 
         auth_token = auth_header.split(" ")[1]
         resp = None
-        if login_type == "normal":
-            resp = User.decode_auth_token(auth_token)
-        else:
+        if login_type == "sso":
             resp = UserSSO.decode_auth_token(auth_token)
+        else:
+            response_object['message'] = 'Provide a valid login type.'
+            return jsonify(response_object), 403
 
         if isinstance(resp, str):
             response_object['message'] = resp
             return jsonify(response_object), 401
 
-        user = None
-        if login_type == "normal":
-            user = User.query.filter_by(id=resp).first()
-        else:
-            user = UserSSO.query.filter_by(id=resp).first()
-
-        if not user or not user.active:
-            return jsonify(response_object), 401
         return f(resp, login_type, *args, **kwargs)
 
     return decorated_function
-
-
-def is_admin(user_id):
-    user = User.query.filter_by(id=user_id).first()
-    return user.admin

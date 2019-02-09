@@ -11,6 +11,7 @@ class BaseConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     MONGO_URI = os.environ.get('MONGO_URI')
     USERS_SERVICE_URL = os.environ.get('USERS_SERVICE_URL')
+    REPOSITORY_URI = os.environ.get('REPOSITORY_URI')
 
 
 class DevelopmentConfig(BaseConfig):

@@ -3,21 +3,22 @@ import json
 from flask import current_app
 
 from project import db
-from project.api.models import User
+from project.api.models import UserSSO
 from tests.base import BaseTestCase
-from tests.utils import add_user
+from tests.utils import add_usersso
 
 
 class TestAuthBlueprint(BaseTestCase):
 
-    def test_user_registration(self):
+    def test_user_twitch_register(self):
         with self.client:
             response = self.client.post(
-                '/auth/register',
+                '/auth/twitchRegister',
                 data=json.dumps({
-                    'username': 'justatest',
-                    'email': 'test@test.com',
-                    'password': '123456',
+                    'twitch_id': '123456',
+                    'username': 'test',
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
                 }),
                 content_type='application/json'
             )
@@ -28,46 +29,30 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertTrue(response.content_type == 'application/json')
             self.assertEqual(response.status_code, 201)
 
-    def test_user_registration_duplicate_email(self):
-        add_user('test', 'test@test.com', 'test')
+    def test_user_twitch_register_already_exist(self):
+        user = add_usersso('test', 'test@test.test', '1234567890', '123456')
         with self.client:
             response = self.client.post(
-                '/auth/register',
+                '/auth/twitchRegister',
                 data=json.dumps({
-                    'username': 'michael',
-                    'email': 'test@test.com',
-                    'password': 'test'
-                }),
-                content_type='application/json',
-            )
-            data = json.loads(response.data.decode())
-            self.assertEqual(response.status_code, 400)
-            self.assertIn(
-                'Sorry. That user already exists.', data['message'])
-            self.assertIn('fail', data['status'])
-
-    def test_user_registration_duplicate_username(self):
-        add_user('test', 'test@test.com', 'test')
-        with self.client:
-            response = self.client.post(
-                '/auth/register',
-                data=json.dumps({
+                    'twitch_id': '123456',
                     'username': 'test',
-                    'email': 'test@test.com2',
-                    'password': 'test'
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
                 }),
-                content_type='application/json',
+                content_type='application/json'
             )
             data = json.loads(response.data.decode())
-            self.assertEqual(response.status_code, 400)
-            self.assertIn(
-                'Sorry. That user already exists.', data['message'])
-            self.assertIn('fail', data['status'])
+            self.assertTrue(data['status'] == 'success')
+            self.assertTrue(data['message'] == 'Already registered.')
+            self.assertTrue(data['auth_token'])
+            self.assertTrue(response.content_type == 'application/json')
+            self.assertEqual(response.status_code, 201)
 
-    def test_user_registration_invalid_json(self):
+    def test_user_twitch_register_invalid_json(self):
         with self.client:
             response = self.client.post(
-                '/auth/register',
+                '/auth/twitchRegister',
                 data=json.dumps({}),
                 content_type='application/json'
             )
@@ -76,13 +61,14 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertIn('Invalid payload.', data['message'])
             self.assertIn('fail', data['status'])
 
-    def test_user_registration_invalid_json_keys_no_username(self):
+    def test_user_twitch_register_invalid_json_keys_no_username(self):
         with self.client:
             response = self.client.post(
-                '/auth/register',
+                '/auth/twitchRegister',
                 data=json.dumps({
-                    'email': 'test@test.com',
-                    'password': 'test'
+                    'twitch_id': '123456',
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
                 }),
                 content_type='application/json',
             )
@@ -91,13 +77,14 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertIn('Invalid payload.', data['message'])
             self.assertIn('fail', data['status'])
 
-    def test_user_registration_invalid_json_keys_no_email(self):
+    def test_user_twitch_register_invalid_json_keys_no_email(self):
         with self.client:
             response = self.client.post(
-                '/auth/register',
+                '/auth/twitchRegister',
                 data=json.dumps({
-                    'username': 'justatest',
-                    'password': 'test'
+                    'twitch_id': '123456',
+                    'username': 'test',
+                    'picture': '1234567890',
                 }),
                 content_type='application/json',
             )
@@ -105,65 +92,17 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(response.status_code, 400)
             self.assertIn('Invalid payload.', data['message'])
             self.assertIn('fail', data['status'])
-
-    def test_user_registration_invalid_json_keys_no_password(self):
-        with self.client:
-            response = self.client.post(
-                '/auth/register',
-                data=json.dumps({
-                    'username': 'justatest',
-                    'email': 'test@test.com'
-                }),
-                content_type='application/json',
-            )
-            data = json.loads(response.data.decode())
-            self.assertEqual(response.status_code, 400)
-            self.assertIn('Invalid payload.', data['message'])
-            self.assertIn('fail', data['status'])
-
-    def test_registered_user_login(self):
-        with self.client:
-            add_user('test', 'test@test.com', 'test')
-            response = self.client.post(
-                '/auth/login',
-                data=json.dumps({
-                    'email': 'test@test.com',
-                    'password': 'test'
-                }),
-                content_type='application/json'
-            )
-            data = json.loads(response.data.decode())
-            self.assertTrue(data['status'] == 'success')
-            self.assertTrue(data['message'] == 'Successfully logged in.')
-            self.assertTrue(data['auth_token'])
-            self.assertTrue(response.content_type == 'application/json')
-            self.assertEqual(response.status_code, 200)
-
-    def test_not_registered_user_login(self):
-        with self.client:
-            response = self.client.post(
-                '/auth/login',
-                data=json.dumps({
-                    'email': 'test@test.com',
-                    'password': 'test'
-                }),
-                content_type='application/json'
-            )
-            data = json.loads(response.data.decode())
-            self.assertTrue(data['status'] == 'fail')
-            self.assertTrue(data['message'] == 'User does not exist.')
-            self.assertTrue(response.content_type == 'application/json')
-            self.assertEqual(response.status_code, 404)
 
     def test_valid_logout(self):
-        add_user('test', 'test@test.com', 'test')
         with self.client:
-            # user login
+            # user login by twitch sso
             resp_login = self.client.post(
-                '/auth/login',
+                '/auth/twitchRegister',
                 data=json.dumps({
-                    'email': 'test@test.com',
-                    'password': 'test'
+                    'twitch_id': '123456',
+                    'username': 'test',
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
                 }),
                 content_type='application/json'
             )
@@ -171,7 +110,8 @@ class TestAuthBlueprint(BaseTestCase):
             token = json.loads(resp_login.data.decode())['auth_token']
             response = self.client.get(
                 '/auth/logout',
-                headers={'Authorization': f'Bearer {token}'}
+                headers={'Authorization': f'Bearer {token}',
+                         'LoginType': 'sso'}
             )
             data = json.loads(response.data.decode())
             self.assertTrue(data['status'] == 'success')
@@ -179,14 +119,15 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(response.status_code, 200)
 
     def test_invalid_logout_expired_token(self):
-        add_user('test', 'test@test.com', 'test')
         current_app.config['TOKEN_EXPIRATION_SECONDS'] = -1
         with self.client:
             resp_login = self.client.post(
-                '/auth/login',
+                '/auth/twitchRegister',
                 data=json.dumps({
-                    'email': 'test@test.com',
-                    'password': 'test'
+                    'twitch_id': '123456',
+                    'username': 'test',
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
                 }),
                 content_type='application/json'
             )
@@ -194,7 +135,8 @@ class TestAuthBlueprint(BaseTestCase):
             token = json.loads(resp_login.data.decode())['auth_token']
             response = self.client.get(
                 '/auth/logout',
-                headers={'Authorization': f'Bearer {token}'}
+                headers={'Authorization': f'Bearer {token}',
+                         'LoginType': 'sso'}
             )
             data = json.loads(response.data.decode())
             self.assertTrue(data['status'] == 'fail')
@@ -202,99 +144,162 @@ class TestAuthBlueprint(BaseTestCase):
                 data['message'] == 'Signature expired. Please log in again.')
             self.assertEqual(response.status_code, 401)
 
-    def test_invalid_logout(self):
+    def test_invalid_logout_auth_token(self):
         with self.client:
             response = self.client.get(
                 '/auth/logout',
-                headers={'Authorization': 'Bearer invalid'})
+                headers={'Authorization': 'Bearer invalid',
+                         'LoginType': 'sso'})
             data = json.loads(response.data.decode())
             self.assertTrue(data['status'] == 'fail')
             self.assertTrue(
                 data['message'] == 'Invalid token. Please log in again.')
             self.assertEqual(response.status_code, 401)
 
-    def test_user_status(self):
-        add_user('test', 'test@test.com', 'test')
+    def test_invalid_logout_null_login_type(self):
         with self.client:
             resp_login = self.client.post(
-                '/auth/login',
+                '/auth/twitchRegister',
                 data=json.dumps({
-                    'email': 'test@test.com',
-                    'password': 'test'
+                    'twitch_id': '123456',
+                    'username': 'test',
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
+                }),
+                content_type='application/json'
+            )
+            # invalid token logout
+            token = json.loads(resp_login.data.decode())['auth_token']
+            response = self.client.get(
+                '/auth/logout',
+                headers={'Authorization': f'Bearer {token}'})
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['status'] == 'fail')
+            self.assertTrue(
+                data['message'] == 'There is no login type.')
+            self.assertEqual(response.status_code, 403)
+
+    def test_invalid_logout_wrong_login_type(self):
+        with self.client:
+            resp_login = self.client.post(
+                '/auth/twitchRegister',
+                data=json.dumps({
+                    'twitch_id': '123456',
+                    'username': 'test',
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
+                }),
+                content_type='application/json'
+            )
+            # invalid token logout
+            token = json.loads(resp_login.data.decode())['auth_token']
+            response = self.client.get(
+                '/auth/logout',
+                headers={'Authorization': f'Bearer {token}',
+                         'LoginType': 'sos'})
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['status'] == 'fail')
+            self.assertTrue(
+                data['message'] == 'Provide a valid login type.')
+            self.assertEqual(response.status_code, 403)
+
+    def test_user_status(self):
+        with self.client:
+            resp_login = self.client.post(
+                '/auth/twitchRegister',
+                data=json.dumps({
+                    'twitch_id': '123456',
+                    'username': 'test',
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
                 }),
                 content_type='application/json'
             )
             token = json.loads(resp_login.data.decode())['auth_token']
             response = self.client.get(
                 '/auth/status',
-                headers={'Authorization': f'Bearer {token}'}
+                headers={'Authorization': f'Bearer {token}',
+                         'LoginType': 'sso'}
             )
             data = json.loads(response.data.decode())
             self.assertTrue(data['status'] == 'success')
             self.assertTrue(data['data'] is not None)
+            self.assertTrue(data['data']['twitch_id'] == '123456')
             self.assertTrue(data['data']['username'] == 'test')
-            self.assertTrue(data['data']['email'] == 'test@test.com')
+            self.assertTrue(data['data']['email'] == 'test@test.test')
             self.assertTrue(data['data']['active'])
-            self.assertFalse(data['data']['admin'])
+            self.assertTrue(data['data']['picture'] == '1234567890')
             self.assertEqual(response.status_code, 200)
 
-    def test_invalid_status(self):
+    def test_invalid_status_wrong_auth_token(self):
         with self.client:
             response = self.client.get(
                 '/auth/status',
-                headers={'Authorization': 'Bearer invalid'})
+                headers={'Authorization': 'Bearer invalid',
+                         'LoginType': 'sso'})
             data = json.loads(response.data.decode())
             self.assertTrue(data['status'] == 'fail')
             self.assertTrue(
                 data['message'] == 'Invalid token. Please log in again.')
             self.assertEqual(response.status_code, 401)
 
-    def test_invalid_logout_inactive(self):
-        add_user('test', 'test@test.com', 'test')
-        # update user
-        user = User.query.filter_by(email='test@test.com').first()
-        user.active = False
-        db.session.commit()
+    def test_invalid_status_null_auth_token(self):
+        with self.client:
+            response = self.client.get(
+                '/auth/status',
+                headers={'LoginType': 'sso'})
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['status'] == 'fail')
+            self.assertTrue(
+                data['message'] == 'Provide a valid auth token.')
+            self.assertEqual(response.status_code, 403)
+
+    def test_invalid_status_null_login_type(self):
         with self.client:
             resp_login = self.client.post(
-                '/auth/login',
+                '/auth/twitchRegister',
                 data=json.dumps({
-                    'email': 'test@test.com',
-                    'password': 'test'
+                    'twitch_id': '123456',
+                    'username': 'test',
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
                 }),
                 content_type='application/json'
             )
+            # invalid token logout
             token = json.loads(resp_login.data.decode())['auth_token']
             response = self.client.get(
                 '/auth/logout',
-                headers={'Authorization':f'Bearer {token}'}
-            )
+                headers={'Authorization': f'Bearer {token}'})
             data = json.loads(response.data.decode())
             self.assertTrue(data['status'] == 'fail')
-            self.assertTrue(data['message'] == 'Provide a valid auth token.')
-            self.assertEqual(response.status_code, 401)
+            self.assertTrue(
+                data['message'] == 'There is no login type.')
+            self.assertEqual(response.status_code, 403)
 
-    def test_invalid_status_inactive(self):
-        add_user('test', 'test@test.com', 'test')
-        # update user
-        user = User.query.filter_by(email='test@test.com').first()
-        user.active = False
-        db.session.commit()
+    def test_invalid_status_wrong_login_type(self):
         with self.client:
             resp_login = self.client.post(
-                '/auth/login',
+                '/auth/twitchRegister',
                 data=json.dumps({
-                    'email': 'test@test.com',
-                    'password': 'test'
+                    'twitch_id': '123456',
+                    'username': 'test',
+                    'email': 'test@test.test',
+                    'picture': '1234567890',
                 }),
                 content_type='application/json'
             )
+            # invalid token logout
             token = json.loads(resp_login.data.decode())['auth_token']
             response = self.client.get(
-                '/auth/status',
-                headers={'Authorization': f'Bearer {token}'}
-            )
+                '/auth/logout',
+                headers={'Authorization': f'Bearer {token}',
+                         'LoginType': 'sos'})
             data = json.loads(response.data.decode())
             self.assertTrue(data['status'] == 'fail')
-            self.assertTrue(data['message'] == 'Provide a valid auth token.')
-            self.assertEqual(response.status_code, 401)
+            self.assertTrue(
+                data['message'] == 'Provide a valid login type.')
+            self.assertEqual(response.status_code, 403)
+
+if __name__ == '__main__':
+    unittest.main()

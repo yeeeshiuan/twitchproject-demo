@@ -2,7 +2,7 @@
 
 import sys
 
-from flask import Blueprint, jsonify, json, request
+from flask import Blueprint, jsonify, json, request, current_app
 
 from project.api.utils import authenticate
 from project import mongo
@@ -34,7 +34,7 @@ def ping_authpong(resp, login_type):
 @authenticate
 def create_user(resp, login_type):
 
-    name = checkUsername(resp)
+    name = getDBname(resp)
     if not name:
         return jsonify({
             'status': 'Fail',
@@ -66,8 +66,16 @@ def create_user(resp, login_type):
 @authenticate
 def insert_one(resp, login_type):
 
-    name = checkUsername(resp)
-    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
+    name = getDBname(resp)
+    if not name:
+        return jsonify({
+            'status': 'Fail',
+            'message': 'Internal server error'
+        })
+
+    repository_uri = current_app.config['REPOSITORY_URI']
+
+    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
     db = userClient[name]
     asdfCollection = db["asdf"]
 
@@ -95,15 +103,16 @@ def insert_one(resp, login_type):
 @authenticate
 def find_one(resp, login_type):
 
-    name = checkUsername(resp)
+    name = getDBname(resp)
     if not name:
         return jsonify({
             'status': 'Fail',
             'message': 'Internal server error'
         })
 
+    repository_uri = current_app.config['REPOSITORY_URI']
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
+    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
     db = userClient[name]
     asdfCollection = db["asdf"]
 
@@ -127,7 +136,7 @@ def find_one(resp, login_type):
 @authenticate
 def update(resp, login_type):
 
-    name = checkUsername(resp)
+    name = getDBname(resp)
     if not name:
         return jsonify({
             'status': 'Fail',
@@ -152,7 +161,9 @@ def update(resp, login_type):
     if not isinstance(sentencesObj, list):
         return jsonify(response_object), 400
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
+    repository_uri = current_app.config['REPOSITORY_URI']
+
+    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     messagesCollection = db["messages"]
@@ -213,14 +224,16 @@ def update(resp, login_type):
 @authenticate
 def findSentencesByUsername(resp, login_type, username):
     
-    name = checkUsername(resp)
+    name = getDBname(resp)
     if not name:
         return jsonify({
             'status': 'Fail',
             'message': 'Internal server error'
         }), 400
     
-    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
+    repository_uri = current_app.config['REPOSITORY_URI']
+
+    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     messagesCollection = db["messages"]
@@ -265,14 +278,16 @@ def findSentencesByUsername(resp, login_type, username):
 @authenticate
 def findSentencesByDisplayname(resp, login_type, display_name):
 
-    name = checkUsername(resp)
+    name = getDBname(resp)
     if not name:
         return jsonify({
             'status': 'Fail',
             'message': 'Internal server error'
         }), 400
     
-    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
+    repository_uri = current_app.config['REPOSITORY_URI']
+
+    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     messagesCollection = db["messages"]
@@ -317,14 +332,16 @@ def findSentencesByDisplayname(resp, login_type, display_name):
 @authenticate
 def findDisplaynamesByKeyword(resp, login_type, keyword):
 
-    name = checkUsername(resp)
+    name = getDBname(resp)
     if not name:
         return jsonify({
             'status': 'Fail',
             'message': 'Internal server error'
         }), 400
     
-    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
+    repository_uri = current_app.config['REPOSITORY_URI']
+
+    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     keywordsCollection = db["keywords"]
@@ -360,14 +377,16 @@ def findDisplaynamesByKeyword(resp, login_type, keyword):
 @authenticate
 def findDisplaynamesBySentence(resp, login_type, sentence):
 
-    name = checkUsername(resp)
+    name = getDBname(resp)
     if not name:
         return jsonify({
             'status': 'Fail',
             'message': 'Internal server error'
         }), 400
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@repository_db:27017/{name}")
+    repository_uri = current_app.config['REPOSITORY_URI']
+
+    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
     db = userClient[name]
     usersCollection = db["users"]
     messagesCollection = db["messages"]
@@ -399,7 +418,7 @@ def findDisplaynamesBySentence(resp, login_type, sentence):
         })
 
 
-def checkUsername(resp):
+def getDBname(resp):
     name = None
     if resp["data"]["twitch_id"]:
         name = "twitch_" + resp["data"]["twitch_id"]
