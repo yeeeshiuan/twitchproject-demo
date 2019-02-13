@@ -1,6 +1,6 @@
 # project/tests/test_config.py
 
-
+import os
 import unittest
 
 from flask import current_app
@@ -17,6 +17,10 @@ class TestDevelopmentConfig(TestCase):
         return app
 
     def test_app_is_development(self):
+        self.assertTrue(
+            app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
+        self.assertTrue(
+            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
         self.assertFalse(current_app is None)
 
 
@@ -26,7 +30,24 @@ class TestTestingConfig(TestCase):
         return app
 
     def test_app_is_testing(self):
+        self.assertTrue(
+            app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
+        self.assertTrue(
+            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
         self.assertTrue(app.config['TESTING'])
+
+
+class TestStagingConfig(TestCase):
+    def create_app(self):
+        app.config.from_object('project.config.StagingConfig')
+        return app
+
+    def test_app_is_production(self):
+        self.assertTrue(
+            app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
+        self.assertTrue(
+            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+        self.assertFalse(app.config['TESTING'])
 
 
 class TestProductionConfig(TestCase):
@@ -35,6 +56,10 @@ class TestProductionConfig(TestCase):
         return app
 
     def test_app_is_production(self):
+        self.assertTrue(
+            app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
+        self.assertTrue(
+            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
         self.assertFalse(app.config['TESTING'])
 
 

@@ -22,7 +22,7 @@ class DevelopmentConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     """Testing configuration"""
     TESTING = True
-    MONGO_URI = os.environ.get('MONGO_TEST_URI')
+    MONGO_URI = ""
 
 
 class StagingConfig(BaseConfig):

@@ -83,7 +83,6 @@ services:
       - FLASK_ENV=development
       - APP_SETTINGS=project.config.DevelopmentConfig
       - MONGO_URI=mongodb://mongodb:mongodb@repository-db:27017
-      - MONGO_TEST_URI=mongodb://mongodb:mongodb@repository-db:27017/test
       - SECRET_KEY=my_precious
       - USERS_SERVICE_URL=http://users:5000
       - REPOSITORY_URI=repository-db:27017

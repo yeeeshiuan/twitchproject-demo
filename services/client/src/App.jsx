@@ -521,8 +521,8 @@ class App extends Component {
         </Switch>
         <Footer className="footerPanel" />
       </div>
-    );
+    )
   }
-}
+};
 
 export default App;

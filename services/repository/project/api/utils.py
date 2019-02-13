@@ -38,15 +38,27 @@ def authenticate(f):
 
 def ensure_authenticated(token, login_type):
     if current_app.config['TESTING']:
-        return True
-    url = '{0}/auth/status'.format(current_app.config['USERS_SERVICE_URL'])
-    bearer = 'Bearer {0}'.format(token)
-    headers = {'Authorization': bearer, 'LoginType': login_type}
-    response = requests.get(url, headers=headers)
-    data = json.loads(response.text)
-    if response.status_code == 200 and \
-       data['status'] == 'success' and \
-       data['data']['active']:
-        return data
+        if token == "valid":
+            insideData =   {"active": True,
+                            "email": "test@test.test",
+                            "id": 1,
+                            "picture": "pictureURL",
+                            "twitch_id": "1234567",
+                            "username": "test"}
+            data = {'status': 'success', 'data': insideData}
+            return data
+        else:
+            return None
     else:
-        return False
+
+        url = '{0}/auth/status'.format(current_app.config['USERS_SERVICE_URL'])
+        bearer = 'Bearer {0}'.format(token)
+        headers = {'Authorization': bearer, 'LoginType': login_type}
+        response = requests.get(url, headers=headers)
+        data = json.loads(response.text)
+        if response.status_code == 200 and \
+           data['status'] == 'success' and \
+           data['data']['active']:
+            return data
+        else:
+            return False

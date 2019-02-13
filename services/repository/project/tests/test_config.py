@@ -1,6 +1,6 @@
 # project/tests/test_config.py
 
-
+import os
 import unittest
 
 from flask import current_app
@@ -17,7 +17,15 @@ class TestDevelopmentConfig(TestCase):
         return app
 
     def test_app_is_development(self):
+        self.assertTrue(
+            app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
         self.assertFalse(current_app is None)
+        self.assertTrue(
+            app.config['MONGO_URI'] == os.environ.get('MONGO_URI'))
+        self.assertTrue(
+            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+        self.assertTrue(
+            app.config['REPOSITORY_URI'] == os.environ.get('REPOSITORY_URI'))
 
 
 class TestTestingConfig(TestCase):
@@ -26,7 +34,32 @@ class TestTestingConfig(TestCase):
         return app
 
     def test_app_is_testing(self):
+        self.assertTrue(
+            app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
         self.assertTrue(app.config['TESTING'])
+        self.assertTrue(
+            app.config['MONGO_URI'] == "")
+        self.assertTrue(
+            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+        self.assertTrue(
+            app.config['REPOSITORY_URI'] == os.environ.get('REPOSITORY_URI'))
+
+
+class TestStagingConfig(TestCase):
+    def create_app(self):
+        app.config.from_object('project.config.StagingConfig')
+        return app
+
+    def test_app_is_production(self):
+        self.assertTrue(
+            app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
+        self.assertFalse(app.config['TESTING'])
+        self.assertTrue(
+            app.config['MONGO_URI'] == os.environ.get('MONGO_URI'))
+        self.assertTrue(
+            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+        self.assertTrue(
+            app.config['REPOSITORY_URI'] == os.environ.get('REPOSITORY_URI'))
 
 
 class TestProductionConfig(TestCase):
@@ -35,7 +68,15 @@ class TestProductionConfig(TestCase):
         return app
 
     def test_app_is_production(self):
+        self.assertTrue(
+            app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
         self.assertFalse(app.config['TESTING'])
+        self.assertTrue(
+            app.config['MONGO_URI'] == os.environ.get('MONGO_URI'))
+        self.assertTrue(
+            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+        self.assertTrue(
+            app.config['REPOSITORY_URI'] == os.environ.get('REPOSITORY_URI'))
 
 
 if __name__ == '__main__':

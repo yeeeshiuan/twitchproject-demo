@@ -62,76 +62,6 @@ def create_user(resp, login_type):
     })
 
 
-@repository_blueprint.route('/repository/insertone', methods=['POST'])
-@authenticate
-def insert_one(resp, login_type):
-
-    name = getDBname(resp)
-    if not name:
-        return jsonify({
-            'status': 'Fail',
-            'message': 'Internal server error'
-        })
-
-    repository_uri = current_app.config['REPOSITORY_URI']
-
-    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
-    db = userClient[name]
-    asdfCollection = db["asdf"]
-
-    try:
-        resAsdf = asdfCollection.insert_one({"_id": "9527", 
-                                             "name": "test"})
-        userClient.close()
-    except errors.DuplicateKeyError:
-        userClient.close()
-        return jsonify({
-            'status': 'fail',
-            'message': f'Data already exists'
-        })
-
-    print(resAsdf, file=sys.stderr) # output <pymongo.results.InsertOneResult object at 0x7f7d717b7f08>
-    print(type(resAsdf), file=sys.stderr) # output <class 'pymongo.results.InsertOneResult'>
-
-    return jsonify({
-        'status': 'success',
-        'message': 'pong!'
-    })
-
-
-@repository_blueprint.route('/repository/findone', methods=['POST'])
-@authenticate
-def find_one(resp, login_type):
-
-    name = getDBname(resp)
-    if not name:
-        return jsonify({
-            'status': 'Fail',
-            'message': 'Internal server error'
-        })
-
-    repository_uri = current_app.config['REPOSITORY_URI']
-
-    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
-    db = userClient[name]
-    asdfCollection = db["asdf"]
-
-    esAsdf = asdfCollection.find_one({"_id": "9527"})
-    userClient.close()
-
-    if esAsdf:
-        return jsonify({
-            'status': 'success',
-            'message': 'find',
-            'data': esAsdf
-        })
-
-    return jsonify({
-        'status': 'fail',
-        'message': 'Noe find'
-    })
-
-
 @repository_blueprint.route('/repository/update', methods=['POST'])
 @authenticate
 def update(resp, login_type):
@@ -163,8 +93,12 @@ def update(resp, login_type):
 
     repository_uri = current_app.config['REPOSITORY_URI']
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
-    db = userClient[name]
+    if current_app.config['TESTING']:
+        db = mongo.cx[name]
+    else:
+        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        db = userClient[name]
+
     usersCollection = db["users"]
     messagesCollection = db["messages"]
     keywordsCollection = db["keywords"]
@@ -212,8 +146,9 @@ def update(resp, login_type):
             messagesCollection.update_one({"_id": messageKeyId}, 
                                           {"$addToSet": {"keyword_ids": keywordKeyId}})
 
-    
-    userClient.close()
+    if not current_app.config['TESTING']:
+        userClient.close()
+
     return jsonify({
         'status': 'success',
         'message': 'Repository update',
@@ -233,12 +168,14 @@ def findSentencesByUsername(resp, login_type, username):
     
     repository_uri = current_app.config['REPOSITORY_URI']
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
-    db = userClient[name]
+    if current_app.config['TESTING']:
+        db = mongo.cx[name]
+    else:
+        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        db = userClient[name]
+
     usersCollection = db["users"]
     messagesCollection = db["messages"]
-
-    print(f'username={username}', file=sys.stderr)
 
     userObj = usersCollection.find_one({"username": username});
 
@@ -246,7 +183,7 @@ def findSentencesByUsername(resp, login_type, username):
         return jsonify({
             'status': 'Fail',
             'message': f'There is no username, who is {username}.',
-        }), 400
+        }), 404
 
     message_ids = userObj["message_ids"]
 
@@ -260,13 +197,14 @@ def findSentencesByUsername(resp, login_type, username):
         messageObj["id"] = index
         messagesObj.append(messageObj)
 
-    userClient.close()
+    if not current_app.config['TESTING']:
+        userClient.close()
 
-    if not message:
+    if not messagesObj:
         return jsonify({
             'status': 'Fail',
             'message': 'There is no message.',
-        }), 400
+        }), 404
     else:
         return jsonify({
             'status': 'success',
@@ -287,12 +225,14 @@ def findSentencesByDisplayname(resp, login_type, display_name):
     
     repository_uri = current_app.config['REPOSITORY_URI']
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
-    db = userClient[name]
+    if current_app.config['TESTING']:
+        db = mongo.cx[name]
+    else:
+        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        db = userClient[name]
+
     usersCollection = db["users"]
     messagesCollection = db["messages"]
-
-    print(f'display_name={display_name}', file=sys.stderr)
 
     userObj = usersCollection.find_one({"display_name": display_name});
 
@@ -300,7 +240,7 @@ def findSentencesByDisplayname(resp, login_type, display_name):
         return jsonify({
             'status': 'Fail',
             'message': f'There is no display name, who is {display_name}.',
-        }), 400
+        }), 404
 
     message_ids = userObj["message_ids"]
 
@@ -314,13 +254,14 @@ def findSentencesByDisplayname(resp, login_type, display_name):
         messageObj["id"] = index
         messagesObj.append(messageObj)
 
-    userClient.close()
+    if not current_app.config['TESTING']:
+        userClient.close()
 
-    if not message:
+    if not messagesObj:
         return jsonify({
             'status': 'Fail',
             'message': 'There is no message.',
-        }), 400
+        }), 404
     else:
         return jsonify({
             'status': 'success',
@@ -341,14 +282,23 @@ def findDisplaynamesByKeyword(resp, login_type, keyword):
     
     repository_uri = current_app.config['REPOSITORY_URI']
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
-    db = userClient[name]
+    if current_app.config['TESTING']:
+        db = mongo.cx[name]
+    else:
+        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        db = userClient[name]
+
     usersCollection = db["users"]
     keywordsCollection = db["keywords"]
 
-    print(f'keyword={keyword}', file=sys.stderr)
-
     keywordObj = keywordsCollection.find_one({"keyword": keyword});
+
+    if not keywordObj:
+        return jsonify({
+            'status': 'Fail',
+            'message': f'There is no keyword({keyword}).',
+        }), 404
+
     user_ids = keywordObj["user_ids"]
 
     users = []
@@ -359,13 +309,14 @@ def findDisplaynamesByKeyword(resp, login_type, keyword):
         userObj["id"] = index
         users.append(userObj)
 
-    userClient.close()
+    if not current_app.config['TESTING']:
+        userClient.close()
 
     if not users:
         return jsonify({
             'status': 'Fail',
-            'message': 'There is no message.',
-        }), 400
+            'message': 'There is no user.',
+        }), 404
     else:
         return jsonify({
             'status': 'success',
@@ -386,14 +337,23 @@ def findDisplaynamesBySentence(resp, login_type, sentence):
 
     repository_uri = current_app.config['REPOSITORY_URI']
 
-    userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
-    db = userClient[name]
+    if current_app.config['TESTING']:
+        db = mongo.cx[name]
+    else:
+        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        db = userClient[name]
+
     usersCollection = db["users"]
     messagesCollection = db["messages"]
-
     print(f'sentence={sentence}', file=sys.stderr)
-
     sentenceObj = messagesCollection.find_one({"message": sentence});
+
+    if not sentenceObj:
+        return jsonify({
+            'status': 'Fail',
+            'message': f'There is no sentence({sentence}).',
+        }), 404
+
     user_ids = sentenceObj["user_ids"]
 
     users = []
@@ -404,13 +364,14 @@ def findDisplaynamesBySentence(resp, login_type, sentence):
         userObj["id"] = index
         users.append(userObj)
 
-    userClient.close()
+    if not current_app.config['TESTING']:
+        userClient.close()
 
     if not users:
         return jsonify({
             'status': 'Fail',
-            'message': 'There is no message.',
-        }), 400
+            'message': 'There is no user.',
+        }), 404
     else:
         return jsonify({
             'status': 'success',
