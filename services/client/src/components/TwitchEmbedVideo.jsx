@@ -19,11 +19,9 @@ class TwitchEmbedVideo extends Component {
 
         let embed;
         if (window.Twitch && window.Twitch.Embed) {
-            console.log("componentDidMount_if");
             embed = new window.Twitch.Embed(this.props.targetClass, { ...this.props });
             this._addEventListeners(embed);
         } else {
-            console.log("componentDidMount_else");
             const script = document.createElement('script');
             script.setAttribute(
                 'src',

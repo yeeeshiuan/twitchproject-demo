@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Route, Redirect, Switch } from 'react-router-dom';
 
 import qs from 'query-string';
 import axios from 'axios';
+
+import App from '../App';
 
 class AuthImplicit extends Component {
   constructor() {
@@ -111,7 +113,10 @@ class AuthImplicit extends Component {
   }
 
   render() {
-    return <Redirect to='/' />;
+    return <Switch>
+           <Route exact={true} path='/' component={App} />
+           <Redirect to='/' />
+           </Switch>;
   }
 }
 

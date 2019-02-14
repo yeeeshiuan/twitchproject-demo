@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { Route, Redirect, Switch } from 'react-router-dom';
+
+import App from '../App';
 
 class Logout extends Component {
 
@@ -7,11 +10,10 @@ class Logout extends Component {
   };
 
   render() {
-    return (
-      <div>
-        <p>你已經登出。</p>
-      </div>
-    )
+    return <Switch>
+           <Route exact={true} path='/' component={App} />
+           <Redirect to='/' />
+           </Switch>;
   };
 };
 

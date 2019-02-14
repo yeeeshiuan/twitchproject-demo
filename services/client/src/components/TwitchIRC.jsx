@@ -29,36 +29,23 @@ class TwitchIRC extends Component {
     this.resetChartData = false;
     /** Binding method **/
     this.onMessageHandler = this.onMessageHandler.bind(this);
-
   };
 
   componentDidMount() {
     if (this.myClient === null) {
-      //debug
-      console.log(this.props.twitchIRCProps);
 
       this.chartDataSelect = this.props.chartDataSelect;
-
       this.resetChartData = this.props.resetChartData;
-
       this.channel = `#${this.props.twitchIRCProps.channels[0]}`;
 
       // create instance
       this.myClient = new ReactTMI.client(this.props.twitchIRCProps);
-
       // Register our event handlers (defined below)
       this.myClient.on('message', this.onMessageHandler);
-
       // Connect to server
       this.myClient.connect();
 
-      // debug
-      console.log(this.myClient);
-
       this.initMessagesAnalyze();
-      console.log("1");
-      console.log(this.props.twitchIRCProps.channels[0]);
-      console.log(this.channel);
     }
   };
 
@@ -68,25 +55,17 @@ class TwitchIRC extends Component {
       this.channel =  `#${this.props.twitchIRCProps.channels[0]}`;
 
       this.myClient.disconnect();
-
       // create instance
       this.myClient = new ReactTMI.client(this.props.twitchIRCProps);
-
       // Register our event handlers (defined below)
       this.myClient.on('message', this.onMessageHandler);
-
       // Connect to server
       this.myClient.connect();
-
       // messagesQueue and data reset
       this.setState({messagesQueue: new Queue(),
                      data: []});
 
       this.initMessagesAnalyze();
-
-      console.log("2");
-      console.log(this.props.twitchIRCProps.channels[0]);
-      console.log(this.channel);
     }
     // 更新圖表資料的呈現類型
     if (this.props.chartDataSelect !== this.chartDataSelect) {
@@ -94,7 +73,6 @@ class TwitchIRC extends Component {
         
         if (this.messagesAnalyze[this.chartDataSelect][0] && 
             this.messagesAnalyze[this.chartDataSelect][0].values.length !== 0) {
-            console.log(this.messagesAnalyze[this.chartDataSelect][0].values.length);
             let temp = [];
             let objTemp = {};
             objTemp["values"] = this.messagesAnalyze[this.chartDataSelect][0].values.slice(0, 10);
@@ -142,12 +120,10 @@ class TwitchIRC extends Component {
 
   updateObject(tag, sourceObject) {
     // if exist then update, if not exist then add
-
     let valueObj = this.messagesAnalyze[tag][0] || {};
     if ( !valueObj.values ) {
         valueObj["values"] = [];
     }
-
     for (let key in sourceObject) {
         // skip loop if the property is from prototype
         if (!sourceObject.hasOwnProperty(key)) continue;
@@ -168,10 +144,8 @@ class TwitchIRC extends Component {
         this.messagesAnalyze[tag].pop();
     }
     this.messagesAnalyze[tag].push(valueObj);
-
     // sort by count descending
     this.messagesAnalyze[tag][0].values.sort((a, b) => parseFloat(b.y) - parseFloat(a.y));
-
     // test
     if ( tag === this.props.chartDataSelect ) {
         if ( this.messagesAnalyze[tag][0] && 
@@ -184,9 +158,7 @@ class TwitchIRC extends Component {
         } else {
             this.initBarChartData();
         }
-
     }
-
   }
 
   // Called every time a message comes in
@@ -219,10 +191,6 @@ class TwitchIRC extends Component {
       const num = this.rollDice();
       /** chat bot say something **/
       this.myClient.say(target, `${num}`);
-      console.log(`* Executed ${messageObj.message} command`);
-
-    } else {
-      console.log(`* Unknown command ${messageObj.message}`);
     }
 
     if ( this.props.isAuthenticated && this.props.enableLexicalAnalyzeService ) {
@@ -263,28 +231,7 @@ class TwitchIRC extends Component {
             }
             this.makeRepositoryService(messagesObj);
         }
-        console.log(JSON.parse(res.data.keywords));
-        console.log(this.messagesAnalyze);
     })
-    .catch((error) => { 
-        // Error
-        if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-        } else if (error.request) {
-            // The request was made but no response was received
-            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-            // http.ClientRequest in node.js
-            console.log(error.request);
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
-        }
-        console.log(error.config);
-     });
   }
 
   makeRepositoryService(messagesObj) {
@@ -299,27 +246,7 @@ class TwitchIRC extends Component {
     };
     axios(options)
     .then((res) => { 
-        console.log(res.data);
     })
-    .catch((error) => { 
-        // Error
-        if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-        } else if (error.request) {
-            // The request was made but no response was received
-            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-            // http.ClientRequest in node.js
-            console.log(error.request);
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
-        }
-        console.log(error.config);
-     });
   }
 
   // Function called when the "dice" command is issued

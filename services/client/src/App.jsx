@@ -9,6 +9,7 @@ import NavBar from './components/NavBar';
 import Logout from './components/Logout';
 import Footer from './components/Footer';
 import MessageList from './components/MessageList';
+import Message from './components/Message';
 
 import './style.css';
 
@@ -66,6 +67,8 @@ class App extends Component {
       findDisplay_namesByKeyword: "",
       findDisplay_namesBySentence: "",
       findingResult: [],
+      messageName: null,
+      messageType: null,
     };
     /** event binding **/
     this.changeChannel = this.changeChannel.bind(this);
@@ -75,6 +78,9 @@ class App extends Component {
     this.changeChartDataSelect = this.changeChartDataSelect.bind(this);
     this.resetChartData = this.resetChartData.bind(this);
     this.updateRoomID = this.updateRoomID.bind(this);
+
+    this.createMessage = this.createMessage.bind(this);
+    this.removeMessage = this.removeMessage.bind(this);
 
     this.findSentencesByUsername = this.findSentencesByUsername.bind(this);
     this.findSentencesByDisplay_name = this.findSentencesByDisplay_name.bind(this);
@@ -241,6 +247,7 @@ class App extends Component {
   logoutUser() {
     window.localStorage.clear();
     this.setState({ isAuthenticated: false });
+    this.createMessage('你已經登出！','success');
   };
 
   updateChannelName(channelName) {
@@ -307,6 +314,24 @@ class App extends Component {
     this.setState({resetChartData: !this.state.resetChartData});
   }
 
+  createMessage(name='Sanity Check', type='success') {
+    this.setState({
+      messageName: name,
+      messageType: type
+    });
+
+    setTimeout(() => {
+      this.removeMessage();
+    }, 3000);
+  };
+
+  removeMessage() {
+    this.setState({
+      messageName: null,
+      messageType: null
+    });
+  };
+
   render() {
     // if request not response, don't rendering
     if (!this.state.twitchIRCProps.channels.length) {
@@ -319,6 +344,13 @@ class App extends Component {
           isAuthenticated={this.state.isAuthenticated}
           twitchOAuthImplicit={this.state.twitchOAuthImplicit}
         />
+       {this.state.messageName && this.state.messageType &&
+         <Message
+           messageName={this.state.messageName}
+           messageType={this.state.messageType}
+           removeMessage={this.removeMessage}
+         />
+       }
         <div className="controlPanel">
           <form onSubmit={(event) => this.changeChannel(event)}>
             <div className="field">
@@ -512,10 +544,9 @@ class App extends Component {
                   {...props} 
               />
             )} />
-            <Route exact path='/logout' render={() => (
+            <Route path='/logout' render={() => (
               <Logout
                 logoutUser={this.logoutUser}
-                isAuthenticated={this.state.isAuthenticated}
               />
             )} />
         </Switch>
