@@ -40,11 +40,12 @@ class MessageList extends Component {
 
   render() {
     const result = this.props.findingResult.length;
+    const tag = "筆數： " + result;
     return (
             <div>
             { result > 0 ? (
               <ul>
-              <li>筆數： {result}</li>
+              <li>{tag}</li>
               {this.data}
               </ul>
             ) : (

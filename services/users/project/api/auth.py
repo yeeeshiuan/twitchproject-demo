@@ -1,3 +1,4 @@
+import sys
 from flask import Blueprint, jsonify, request
 from sqlalchemy import exc, or_
 
@@ -16,7 +17,7 @@ def twitch_Register():
         'status': 'fail',
         'message': 'Invalid payload.'
     }
-
+    print(f'post_data={post_data}', file=sys.stderr)
     if not post_data:
         return jsonify(response_object), 400
 

@@ -25,7 +25,6 @@ class AuthImplicit extends Component {
     // CSRF isn't correct
     if (state !== `${process.env.REACT_APP_CSRF_TOKEN}`) {
         this.setState({twitchUnauthorized: true});
-        console.log("CSRF is not correct.");
         return;
     }
 
@@ -40,35 +39,8 @@ class AuthImplicit extends Component {
 
     axios(options)
     .then((res) => { 
-        console.log(res.data);
         this.registerUserByTwitchRef(res.data); 
     })
-    .catch((error) => { 
-        // Error
-        if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-            
-            // user doesn't give twitch the auth
-            if (error.response.data.error === "Unauthorized") {
-                this.setState({twitchUnauthorized: true});
-                console.log("Twitch return error.(Unauthorized)");
-            }
-            
-        } else if (error.request) {
-            // The request was made but no response was received
-            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-            // http.ClientRequest in node.js
-            console.log(error.request);
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
-        }
-        console.log(error.config);
-     });
   }
 
   registerUserByTwitchRef(userRef) {
@@ -86,13 +58,11 @@ class AuthImplicit extends Component {
 
     axios(options)
     .then((res) => { 
-        console.log(res.data);
         this.props.loginUser(res.data.auth_token, "sso");
         if (this.props.enableRepository && res.data.message === "Successfully registered.") {
             this.createDatabaseForThisUser();
         }
     })
-    .catch((err) => { console.log(err); });
   }
 
   createDatabaseForThisUser() {
@@ -107,9 +77,7 @@ class AuthImplicit extends Component {
 
     axios(options)
     .then((res) => { 
-        console.log(res.data);
     })
-    .catch((err) => { console.log(err); });
   }
 
   render() {

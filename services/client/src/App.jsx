@@ -91,7 +91,7 @@ class App extends Component {
   componentWillMount() {
     if (window.localStorage.getItem('authToken')) {
       this.setState({ isAuthenticated: true,
-                      loginType: window.localStorage.getItem('authToken')
+                      loginType: window.localStorage.getItem('loginType')
       });
     };
   };
@@ -433,6 +433,7 @@ class App extends Component {
                       type="submit"
                       className="button is-info"
                       value="尋找"
+                      data-cy="usernameSubmit"
                     />
                 </div>
             </div>
@@ -460,6 +461,7 @@ class App extends Component {
                       type="submit"
                       className="button is-info"
                       value="尋找"
+                      data-cy="display_nameSubmit"
                     />
                 </div>
             </div>
@@ -487,6 +489,7 @@ class App extends Component {
                       type="submit"
                       className="button is-info"
                       value="尋找"
+                      data-cy="keywordSubmit"
                     />
                 </div>
             </div>
@@ -514,6 +517,7 @@ class App extends Component {
                       type="submit"
                       className="button is-info"
                       value="尋找"
+                      data-cy="sentenceSubmit"
                     />
                 </div>
             </div>
