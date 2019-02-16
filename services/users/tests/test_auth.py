@@ -1,9 +1,8 @@
+import unittest
 import json
 
 from flask import current_app
 
-from project import db
-from project.api.models import UserSSO
 from tests.base import BaseTestCase
 from tests.utils import add_usersso
 
@@ -30,7 +29,7 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(response.status_code, 201)
 
     def test_user_twitch_register_already_exist(self):
-        user = add_usersso('test', 'test@test.test', '1234567890', '123456')
+        add_usersso('test', 'test@test.test', '1234567890', '123456')
         with self.client:
             response = self.client.post(
                 '/auth/twitchRegister',
@@ -300,6 +299,7 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertTrue(
                 data['message'] == 'Provide a valid login type.')
             self.assertEqual(response.status_code, 403)
+
 
 if __name__ == '__main__':
     unittest.main()

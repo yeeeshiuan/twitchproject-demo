@@ -1,6 +1,3 @@
-# project/config.py
-
-
 import os
 
 
@@ -16,7 +13,6 @@ class BaseConfig:
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
-
 
 
 class TestingConfig(BaseConfig):

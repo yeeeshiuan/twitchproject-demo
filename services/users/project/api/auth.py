@@ -1,10 +1,9 @@
-import sys
 from flask import Blueprint, jsonify, request
 from sqlalchemy import exc, or_
 
 from project.api.utils import authenticate
 from project.api.models import UserSSO
-from project import db, bcrypt
+from project import db
 
 auth_blueprint = Blueprint('auth', __name__)
 
@@ -17,7 +16,7 @@ def twitch_Register():
         'status': 'fail',
         'message': 'Invalid payload.'
     }
-    print(f'post_data={post_data}', file=sys.stderr)
+
     if not post_data:
         return jsonify(response_object), 400
 
@@ -28,7 +27,8 @@ def twitch_Register():
     try:
         # check for existing user
         user = UserSSO.query.filter(
-            or_(UserSSO.twitch_id == twitch_id, UserSSO.email == email)).first()
+            or_(UserSSO.twitch_id == twitch_id, UserSSO.email == email)
+        ).first()
 
         if not user:
             # add new user to db

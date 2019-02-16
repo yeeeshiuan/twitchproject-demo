@@ -1,9 +1,6 @@
 # project/api/utils.py
-
-
 import json
 from functools import wraps
-import sys
 
 import requests
 from flask import request, jsonify, current_app
@@ -40,12 +37,12 @@ def authenticate(f):
 def ensure_authenticated(token, login_type):
     if current_app.config['TESTING']:
         if token == "valid":
-            insideData =   {"active": True,
-                            "email": "test@test.test",
-                            "id": 1,
-                            "picture": "pictureURL",
-                            "twitch_id": "1234567",
-                            "username": "test"}
+            insideData = {"active": True,
+                          "email": "test@test.test",
+                          "id": 1,
+                          "picture": "pictureURL",
+                          "twitch_id": "1234567",
+                          "username": "test"}
             data = {'status': 'success', 'data': insideData}
             return data
         else:

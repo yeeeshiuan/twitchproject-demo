@@ -1,8 +1,5 @@
-# project/tests/test_eval.py
-
-
 import json
-from mockupdb import MockupDB, go, Command, OpMsg
+from mockupdb import go
 
 from project.tests.base import BaseTestCase
 
@@ -64,7 +61,7 @@ class TestRepositoryBlueprint(BaseTestCase):
     def test_createuser(self):
         """Ensure the /repository/createuser route behaves correctly."""
         # arrange
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     '/repository/createuser',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -81,17 +78,18 @@ class TestRepositoryBlueprint(BaseTestCase):
     def test_createuser_duplicateKey(self):
         """Ensure error is thrown if the user is already exist."""
         # arrange
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     '/repository/createuser',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
-        request = self.server.receives().command_err(11000, 'duplicateKey error')
+        self.server.receives().command_err(11000, 'duplicateKey error')
         # act
         http_response = future()
         # assert
         data = json.loads(http_response.data.decode())
         self.assertEqual(http_response.status_code, 200)
-        self.assertIn('User twitch_1234567@twitch_1234567 already exists', data['message'])
+        self.assertIn('User twitch_1234567@twitch_1234567 already exists',
+                      data['message'])
         self.assertIn('fail', data['status'])
 
     def test_createuser_invalid_token(self):
@@ -106,30 +104,31 @@ class TestRepositoryBlueprint(BaseTestCase):
         self.assertIn('error', data['status'])
 
     def test_findSentencesByUsername(self):
-        """Ensure the /repository/findSentencesByUsername/<username> route behaves correctly."""
+        """Ensure the route behaves correctly."""
+        """ /repository/findSentencesByUsername/<username> """
         # arrange
         username = "testUser"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findSentencesByUsername/{username}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
-        request.ok(cursor={'id': 248441332, 
+        request = self.server.receives()
+        request.ok(cursor={'id': 248441332,
                            'firstBatch': [{
                                'id': 248441332,
-	                           'badges' : None,
-	                           'display_name' : username,
-	                           'username' : username,
-	                           'room_id' : ['24765850'],
-                               'tmi_sent_ts' : ['1549100925855'],
-	                           'message_ids' : ['5c5556beb73882000e44a6a3']}]})
+                               'badges': None,
+                               'display_name': username,
+                               'username': username,
+                               'room_id': ['24765850'],
+                               'tmi_sent_ts': ['1549100925855'],
+                               'message_ids': ['5c5556beb73882000e44a6a3']}]})
 
-        request = self.server.receives();
-        request.ok(cursor={'id': '5c5556beb73882000e44a6a3', 
+        request = self.server.receives()
+        request.ok(cursor={'id': '5c5556beb73882000e44a6a3',
                            'firstBatch': [{
-                           'id': '5c5556beb73882000e44a6a3', 
-	                       'message' : '???'}]})
+                               'id': '5c5556beb73882000e44a6a3',
+                               'message': '???'}]})
 
         message = []
         messageObj = {}
@@ -151,40 +150,41 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if the username is not exist."""
         # arrange
         username = "testUser"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findSentencesByUsername/{username}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
+        request = self.server.receives()
         request.ok(cursor={'id': None, 'firstBatch': []})
         # act
         http_response = future()
         # assert
         data = json.loads(http_response.data.decode())
         self.assertEqual(http_response.status_code, 404)
-        self.assertEqual(f'There is no username, who is {username}.', data['message'])
+        self.assertEqual(f'There is no username, who is {username}.',
+                         data['message'])
         self.assertIn('Fail', data['status'])
 
     def test_findSentencesByUsername_no_message(self):
         """Ensure error is thrown if no message exist."""
         # arrange
         username = "testUser"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findSentencesByUsername/{username}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
-        request.ok(cursor={'id': 248441332, 
+        request = self.server.receives()
+        request.ok(cursor={'id': 248441332,
                            'firstBatch': [{
                                'id': 248441332,
-	                           'badges' : None,
-	                           'display_name' : username,
-	                           'username' : username,
-	                           'room_id' : [],
-                               'tmi_sent_ts' : [],
-	                           'message_ids' : []}]})
+                               'badges': None,
+                               'display_name': username,
+                               'username': username,
+                               'room_id': [],
+                               'tmi_sent_ts': [],
+                               'message_ids': []}]})
         # act
         http_response = future()
         # assert
@@ -194,29 +194,30 @@ class TestRepositoryBlueprint(BaseTestCase):
         self.assertIn('Fail', data['status'])
 
     def test_findSentencesByDisplayname(self):
-        """Ensure the /repository/findSentencesByDisplayname/<display_name> route behaves correctly."""
+        """Ensure the route behaves correctly."""
+        """ /repository/findSentencesByDisplayname/<display_name> """
         # arrange
         display_name = "testUser"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findSentencesByDisplayname/{display_name}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
-        request.ok(cursor={'id': 248441332, 
+        request = self.server.receives()
+        request.ok(cursor={'id': 248441332,
                            'firstBatch': [{
                                'id': 248441332,
-	                           'badges' : None,
-	                           'display_name' : display_name,
-	                           'username' : display_name,
-	                           'room_id' : ['24765850'],
-                               'tmi_sent_ts' : ['1549100925855'],
-	                           'message_ids' : ['5c5556beb73882000e44a6a3']}]})
+                               'badges': None,
+                               'display_name': display_name,
+                               'username': display_name,
+                               'room_id': ['24765850'],
+                               'tmi_sent_ts': ['1549100925855'],
+                               'message_ids': ['5c5556beb73882000e44a6a3']}]})
 
-        request = self.server.receives();
-        request.ok(cursor={'id': '5c5556beb73882000e44a6a3', 
+        request = self.server.receives()
+        request.ok(cursor={'id': '5c5556beb73882000e44a6a3',
                            'firstBatch': [{'id': '5c5556beb73882000e44a6a3',
-                                           'message' : '???'}]})
+                                           'message': '???'}]})
 
         message = []
         messageObj = {}
@@ -238,40 +239,41 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if the displayname is not exist."""
         # arrange
         display_name = "testUser"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findSentencesByDisplayname/{display_name}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
+        request = self.server.receives()
         request.ok(cursor={'id': None, 'firstBatch': []})
         # act
         http_response = future()
         # assert
         data = json.loads(http_response.data.decode())
         self.assertEqual(http_response.status_code, 404)
-        self.assertEqual(f'There is no display name, who is {display_name}.', data['message'])
+        self.assertEqual(f'There is no display name, who is {display_name}.',
+                         data['message'])
         self.assertIn('Fail', data['status'])
 
     def test_findSentencesByDisplayname_no_message(self):
         """Ensure error is thrown if no message exist."""
         # arrange
         display_name = "testUser"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findSentencesByDisplayname/{display_name}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
-        request.ok(cursor={'id': 248441332, 
+        request = self.server.receives()
+        request.ok(cursor={'id': 248441332,
                            'firstBatch': [{
                                'id': 248441332,
-	                           'badges' : None,
-	                           'display_name' : display_name,
-	                           'username' : display_name,
-	                           'room_id' : [],
-                               'tmi_sent_ts' : [],
-	                           'message_ids' : []}]})
+                               'badges': None,
+                               'display_name': display_name,
+                               'username': display_name,
+                               'room_id': [],
+                               'tmi_sent_ts': [],
+                               'message_ids': []}]})
         # act
         http_response = future()
         # assert
@@ -281,27 +283,28 @@ class TestRepositoryBlueprint(BaseTestCase):
         self.assertIn('Fail', data['status'])
 
     def test_findDisplaynamesByKeyword(self):
-        """Ensure the /repository/findDisplaynamesByKeyword/<keyword> route behaves correctly."""
+        """Ensure the route behaves correctly."""
+        """ /repository/findDisplaynamesByKeyword/<keyword> """
         # arrange
         keyword = "noun"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findDisplaynamesByKeyword/{keyword}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
-        request.ok(cursor={'id': '5c555871b73882000e44a89a', 
+        request = self.server.receives()
+        request.ok(cursor={'id': '5c555871b73882000e44a89a',
                            'firstBatch': [{
                                'id': '5c555871b73882000e44a89a',
-	                           'keyword' : keyword,
-	                           'keyword_type' : 'n',
-                               'user_ids' : ['1549100925855'],
-	                           'message_ids' : ['5c5556beb73882000e44a6a3']}]})
+                               'keyword': keyword,
+                               'keyword_type': 'n',
+                               'user_ids': ['1549100925855'],
+                               'message_ids': ['5c5556beb73882000e44a6a3']}]})
 
-        request = self.server.receives();
-        request.ok(cursor={'id': '1549100925855', 
+        request = self.server.receives()
+        request.ok(cursor={'id': '1549100925855',
                            'firstBatch': [{'id': '1549100925855',
-                                           'display_name' : 'test9527'}]})
+                                           'display_name': 'test9527'}]})
 
         users = []
         userObj = {}
@@ -321,12 +324,12 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if the keyword is not exist."""
         # arrange
         keyword = "noun"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findDisplaynamesByKeyword/{keyword}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
+        request = self.server.receives()
         request.ok(cursor={'id': None, 'firstBatch': []})
 
         # act
@@ -341,19 +344,19 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if no user exist."""
         # arrange
         keyword = "noun"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findDisplaynamesByKeyword/{keyword}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
-        request.ok(cursor={'id': '5c555871b73882000e44a89a', 
+        request = self.server.receives()
+        request.ok(cursor={'id': '5c555871b73882000e44a89a',
                            'firstBatch': [{
                                'id': '5c555871b73882000e44a89a',
-	                           'keyword' : keyword,
-	                           'keyword_type' : 'n',
-                               'user_ids' : [],
-	                           'message_ids' : ['5c5556beb73882000e44a6a3']}]})
+                               'keyword': keyword,
+                               'keyword_type': 'n',
+                               'user_ids': [],
+                               'message_ids': ['5c5556beb73882000e44a6a3']}]})
 
         # act
         http_response = future()
@@ -364,25 +367,26 @@ class TestRepositoryBlueprint(BaseTestCase):
         self.assertIn('Fail', data['status'])
 
     def test_findDisplaynamesBySentence(self):
-        """Ensure the /repository/findDisplaynamesBySentence/<sentence> route behaves correctly."""
+        """Ensure the route behaves correctly."""
+        """  /repository/findDisplaynamesBySentence/<sentence> """
         # arrange
         sentence = "abcd"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findDisplaynamesBySentence/{sentence}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
-        request.ok(cursor={'id': '5c555871b73882000e44a89a', 
+        request = self.server.receives()
+        request.ok(cursor={'id': '5c555871b73882000e44a89a',
                            'firstBatch': [{
                                'id': '5c555871b73882000e44a89a',
-	                           'message' : sentence,
-                               'user_ids' : ['1549100925855'],
-	                           'keyword_ids' : ['5c5556beb73882000e44a6a3']}]})
+                               'message': sentence,
+                               'user_ids': ['1549100925855'],
+                               'keyword_ids': ['5c5556beb73882000e44a6a3']}]})
 
-        request = self.server.receives();
-        request.ok(cursor={'id': '1549100925855', 
-                           'firstBatch': [{'display_name' : 'test9527',
+        request = self.server.receives()
+        request.ok(cursor={'id': '1549100925855',
+                           'firstBatch': [{'display_name': 'test9527',
                                            '_id': '1549100925855'}]})
 
         users = []
@@ -404,12 +408,12 @@ class TestRepositoryBlueprint(BaseTestCase):
 
         # arrange
         sentence = "abcd"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findDisplaynamesBySentence/{sentence}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
+        request = self.server.receives()
         request.ok(cursor={'id': None, 'firstBatch': []})
 
         # act
@@ -424,18 +428,18 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if no user exist."""
         # arrange
         sentence = "abcd"
-        future = go(self.client.post, 
+        future = go(self.client.post,
                     f'/repository/findDisplaynamesBySentence/{sentence}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
 
-        request = self.server.receives();
-        request.ok(cursor={'id': '5c555871b73882000e44a89a', 
+        request = self.server.receives()
+        request.ok(cursor={'id': '5c555871b73882000e44a89a',
                            'firstBatch': [{
                                '_id': '5c555871b73882000e44a89a',
-	                           'message' : sentence,
-                               'user_ids' : [],
-	                           'keyword_ids' : ['5c5556beb73882000e44a6a3']}]})
+                               'message': sentence,
+                               'user_ids': [],
+                               'keyword_ids': ['5c5556beb73882000e44a6a3']}]})
 
         # act
         http_response = future()
@@ -469,10 +473,11 @@ class TestRepositoryBlueprint(BaseTestCase):
         sentencesObj.append(sentenceObj)
 
         data['sentencesObj'] = sentencesObj
-        
-        future = go(self.client.post, 
+
+        future = go(self.client.post,
                     '/repository/update',
-                    headers=dict(Authorization='Bearer valid', LoginType='sso'),
+                    headers=dict(Authorization='Bearer valid',
+                                 LoginType='sso'),
                     data=json.dumps(data),
                     content_type='application/json'
                     )
@@ -482,7 +487,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         request = self.server.receives()
         request.ok()
         request = self.server.receives()
-        request.ok(cursor={'id': '5c555871b73882000e44a89a', 
+        request.ok(cursor={'id': '5c555871b73882000e44a89a',
                            'firstBatch': [{
                                '_id': '5c555871b73882000e44a89a'}]})
         request = self.server.receives()
@@ -490,7 +495,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         request = self.server.receives()
         request.ok()
         request = self.server.receives()
-        request.ok(cursor={'id': '5c555871b73882000e44a89a', 
+        request.ok(cursor={'id': '5c555871b73882000e44a89a',
                            'firstBatch': [{
                                '_id': '5c555871b73882000e44a89a'}]})
         request = self.server.receives()
@@ -529,10 +534,11 @@ class TestRepositoryBlueprint(BaseTestCase):
         sentencesObj.append(sentenceObj)
 
         data['sentencesObj'] = sentencesObj
-        
-        future = go(self.client.post, 
+
+        future = go(self.client.post,
                     '/repository/update',
-                    headers=dict(Authorization='Bearer valid', LoginType='sso'),
+                    headers=dict(Authorization='Bearer valid',
+                                 LoginType='sso'),
                     data=json.dumps(data),
                     content_type='application/json'
                     )
@@ -544,7 +550,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         request = self.server.receives()
         request.ok(cursor={'id': None, 'firstBatch': []})
         request = self.server.receives()
-        request.ok(cursor={'id': '5c555871b73882000e44a89a', 
+        request.ok(cursor={'id': '5c555871b73882000e44a89a',
                            'firstBatch': [{
                                '_id': '5c555871b73882000e44a89a'}]})
         request = self.server.receives()
@@ -554,7 +560,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         request = self.server.receives()
         request.ok(cursor={'id': None, 'firstBatch': []})
         request = self.server.receives()
-        request.ok(cursor={'id': '5c555871b73882000e44a89a', 
+        request.ok(cursor={'id': '5c555871b73882000e44a89a',
                            'firstBatch': [{
                                '_id': '5c555871b73882000e44a89a'}]})
         request = self.server.receives()

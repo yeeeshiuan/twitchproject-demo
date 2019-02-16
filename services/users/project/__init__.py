@@ -19,7 +19,8 @@ def create_app(script_info=None):
     app = Flask(__name__)
 
     # enable CORS
-    CORS(app) # TODO https://flask-cors.corydolphin.com/en/latest/api.html#extension resources
+    # TODO https://flask-cors.corydolphin.com/en/latest/api.html#extension
+    CORS(app)
 
     # set config
     app_settings = os.getenv('APP_SETTINGS')

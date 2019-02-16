@@ -19,8 +19,10 @@ class TestDevelopmentConfig(TestCase):
     def test_app_is_development(self):
         self.assertTrue(
             app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
+        USERS_SERVICE_URL = app.config['USERS_SERVICE_URL']
         self.assertTrue(
-            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+            USERS_SERVICE_URL == os.environ.get('USERS_SERVICE_URL')
+        )
         self.assertFalse(current_app is None)
 
 
@@ -32,8 +34,10 @@ class TestTestingConfig(TestCase):
     def test_app_is_testing(self):
         self.assertTrue(
             app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
+        USERS_SERVICE_URL = app.config['USERS_SERVICE_URL']
         self.assertTrue(
-            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+            USERS_SERVICE_URL == os.environ.get('USERS_SERVICE_URL')
+        )
         self.assertTrue(app.config['TESTING'])
 
 
@@ -45,8 +49,10 @@ class TestStagingConfig(TestCase):
     def test_app_is_production(self):
         self.assertTrue(
             app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
+        USERS_SERVICE_URL = app.config['USERS_SERVICE_URL']
         self.assertTrue(
-            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+            USERS_SERVICE_URL == os.environ.get('USERS_SERVICE_URL')
+        )
         self.assertFalse(app.config['TESTING'])
 
 
@@ -58,8 +64,10 @@ class TestProductionConfig(TestCase):
     def test_app_is_production(self):
         self.assertTrue(
             app.config['SECRET_KEY'] == os.environ.get('SECRET_KEY'))
+        USERS_SERVICE_URL = app.config['USERS_SERVICE_URL']
         self.assertTrue(
-            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+            USERS_SERVICE_URL == os.environ.get('USERS_SERVICE_URL')
+        )
         self.assertFalse(app.config['TESTING'])
 
 

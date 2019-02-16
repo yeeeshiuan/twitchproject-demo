@@ -3,9 +3,10 @@ import jwt
 
 from flask import current_app
 
-from project import db, bcrypt
+from project import db
 
 from sqlalchemy.sql import func
+
 
 class UserSSO(db.Model):
     __tablename__ = 'users_sso'
@@ -39,7 +40,6 @@ class UserSSO(db.Model):
             current_app.config.get('SECRET_KEY'),
             algorithm='HS256'
         )
-
 
     @staticmethod
     def decode_auth_token(auth_token):

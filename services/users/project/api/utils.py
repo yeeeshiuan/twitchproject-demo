@@ -1,6 +1,5 @@
 from functools import wraps
 from flask import request, jsonify
-import sys
 
 from project.api.models import UserSSO
 

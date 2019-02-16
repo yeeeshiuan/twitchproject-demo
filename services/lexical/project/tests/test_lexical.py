@@ -127,6 +127,3 @@ class TestLexicalBlueprint(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual('fail', data['status'])
         self.assertEqual('Invalid payload.', data['message'])
-
-
-

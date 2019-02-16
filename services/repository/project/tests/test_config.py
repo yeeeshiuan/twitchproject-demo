@@ -22,8 +22,10 @@ class TestDevelopmentConfig(TestCase):
         self.assertFalse(current_app is None)
         self.assertTrue(
             app.config['MONGO_URI'] == os.environ.get('MONGO_URI'))
+        USERS_SERVICE_URL = app.config['USERS_SERVICE_URL']
         self.assertTrue(
-            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+            USERS_SERVICE_URL == os.environ.get('USERS_SERVICE_URL')
+        )
         self.assertTrue(
             app.config['REPOSITORY_URI'] == os.environ.get('REPOSITORY_URI'))
 
@@ -39,8 +41,10 @@ class TestTestingConfig(TestCase):
         self.assertTrue(app.config['TESTING'])
         self.assertTrue(
             app.config['MONGO_URI'] == "")
+        USERS_SERVICE_URL = app.config['USERS_SERVICE_URL']
         self.assertTrue(
-            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+            USERS_SERVICE_URL == os.environ.get('USERS_SERVICE_URL')
+        )
         self.assertTrue(
             app.config['REPOSITORY_URI'] == os.environ.get('REPOSITORY_URI'))
 
@@ -56,8 +60,10 @@ class TestStagingConfig(TestCase):
         self.assertFalse(app.config['TESTING'])
         self.assertTrue(
             app.config['MONGO_URI'] == os.environ.get('MONGO_URI'))
+        USERS_SERVICE_URL = app.config['USERS_SERVICE_URL']
         self.assertTrue(
-            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+            USERS_SERVICE_URL == os.environ.get('USERS_SERVICE_URL')
+        )
         self.assertTrue(
             app.config['REPOSITORY_URI'] == os.environ.get('REPOSITORY_URI'))
 
@@ -73,8 +79,10 @@ class TestProductionConfig(TestCase):
         self.assertFalse(app.config['TESTING'])
         self.assertTrue(
             app.config['MONGO_URI'] == os.environ.get('MONGO_URI'))
+        USERS_SERVICE_URL = app.config['USERS_SERVICE_URL']
         self.assertTrue(
-            app.config['USERS_SERVICE_URL'] == os.environ.get('USERS_SERVICE_URL'))
+            USERS_SERVICE_URL == os.environ.get('USERS_SERVICE_URL')
+        )
         self.assertTrue(
             app.config['REPOSITORY_URI'] == os.environ.get('REPOSITORY_URI'))
 

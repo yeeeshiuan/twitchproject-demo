@@ -39,8 +39,6 @@ def analyze(resp, login_type):
     # get post data
     post_data = request.get_json()
 
-    print(f'post_data={post_data}, dataType={type(post_data)}', file=sys.stderr)
-
     response_object = {
         'status': 'fail',
         'message': 'Invalid payload.'
@@ -55,10 +53,10 @@ def analyze(resp, login_type):
         return jsonify(response_object), 400
 
     # 客製化的分類詞性
-    # reference: https://gist.github.com/hscspring/c985355e0814f01437eaf8fd55fd7998
-    nounFlags = ["n","nr","nrfg","nrt","ns","nt","nz"]
-    verbFlags = ["v","vd","vi","vn","vq"]
-    adjFlags = ["a","ad","an"]
+    # https://gist.github.com/hscspring/c985355e0814f01437eaf8fd55fd7998
+    nounFlags = ["n", "nr", "nrfg", "nrt", "ns", "nt", "nz"]
+    verbFlags = ["v", "vd", "vi", "vn", "vq"]
+    adjFlags = ["a", "ad", "an"]
 
     nouns = {}
     verbs = {}
@@ -68,7 +66,8 @@ def analyze(resp, login_type):
 
     # 分詞，並依照詞性填入對應的dict 中
     for sentence in sentences:
-        print(f'sentence={sentence}, dataType={type(sentence)}', file=sys.stderr)
+        print(f'sentence={sentence}, dataType={type(sentence)}',
+              file=sys.stderr)
 
         if sentence is None:
             continue
@@ -109,12 +108,13 @@ def analyze(resp, login_type):
     result["adjs"] = adjs
 
     # If ensure_ascii is false,
-    # then the return value will be a unicode instance subject to normal Python str
+    # then the return value will be a unicode instance subject to normal str
     # to unicode coercion rules instead of being escaped to an ASCII str.
     return jsonify({
         'status': 'success',
         'keywords': json.dumps(result, ensure_ascii=False),
-        'keywordsBySentence': json.dumps(keywordsBySentence, ensure_ascii=False)
+        'keywordsBySentence': json.dumps(keywordsBySentence,
+                                         ensure_ascii=False)
     })
 
 

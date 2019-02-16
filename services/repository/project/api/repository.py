@@ -2,7 +2,7 @@
 
 import sys
 
-from flask import Blueprint, jsonify, json, request, current_app
+from flask import Blueprint, jsonify, request, current_app
 
 from project.api.utils import authenticate
 from project import mongo
@@ -44,11 +44,11 @@ def create_user(resp, login_type):
     try:
         # create the db and create the user
         userdb = mongo.cx[name]
-        result = userdb.command("createUser",
-                                 name,
-                                 pwd=name,
-                                 roles=[{"role":"readWrite", 
-                                         "db":name}])
+        userdb.command("createUser",
+                       name,
+                       pwd=name,
+                       roles=[{"role": "readWrite",
+                               "db": name}])
 
     except errors.DuplicateKeyError:
         return jsonify({
@@ -75,7 +75,8 @@ def update(resp, login_type):
 
     # get post data
     post_data = request.get_json()
-    print(f'post_data={post_data}, dataType={type(post_data)}', file=sys.stderr)
+    print(f'post_data={post_data}, dataType={type(post_data)}',
+          file=sys.stderr)
 
     response_object = {
         'status': 'fail',
@@ -86,7 +87,8 @@ def update(resp, login_type):
         return jsonify(response_object), 400
 
     sentencesObj = post_data.get('sentencesObj')
-    print(f'sentence={sentencesObj}, dataType={type(sentencesObj)}', file=sys.stderr)
+    print(f'sentence={sentencesObj}, dataType={type(sentencesObj)}',
+          file=sys.stderr)
 
     if not isinstance(sentencesObj, list):
         return jsonify(response_object), 400
@@ -96,55 +98,63 @@ def update(resp, login_type):
     if current_app.config['TESTING']:
         db = mongo.cx[name]
     else:
-        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        userClient = MongoClient(f"mongodb://{name}:{name}@" +
+                                 repository_uri +
+                                 f"/{name}")
         db = userClient[name]
 
-    usersCollection = db["users"]
-    messagesCollection = db["messages"]
-    keywordsCollection = db["keywords"]
+    usersColl = db["users"]
+    messagesColl = db["messages"]
+    keywordsColl = db["keywords"]
 
-    for sentenceObj in sentencesObj:
-        userKey = {"_id": sentenceObj["user_id"]}
+    for sObj in sentencesObj:
+        userKey = {"_id": sObj["user_id"]}
 
-        usersCollection.update_one(userKey, 
-                                   {"$set":{"username": sentenceObj["username"], 
-                                            "badges": sentenceObj["badges"], 
-                                            "display_name": sentenceObj["display_name"]}}, 
-                                   upsert=True)
-        usersCollection.update_one(userKey,
-                                   {"$push": {"tmi_sent_ts": sentenceObj["tmi_sent_ts"],
-                                                  "room_id": sentenceObj["room_id"]}})
+        usersColl.update_one(userKey,
+                             {"$set": {"username": sObj["username"],
+                                       "badges": sObj["badges"],
+                                       "display_name": sObj["display_name"]}},
+                             upsert=True)
+        usersColl.update_one(userKey,
+                             {"$push": {"tmi_sent_ts": sObj["tmi_sent_ts"],
+                                        "room_id": sObj["room_id"]}})
 
         messageKeyId = None
-        cursor = messagesCollection.find_one({"message":sentenceObj["message"]})
+        cursor = messagesColl.find_one({"message": sObj["message"]})
         if cursor:
             messageKeyId = cursor["_id"]
         else:
-            cursor = messagesCollection.insert_one({"message": sentenceObj["message"]})
+            cursor = messagesColl.insert_one({"message": sObj["message"]})
             messageKeyId = cursor.inserted_id
 
-        usersCollection.update_one(userKey, 
-                                   {"$addToSet": {"message_ids": messageKeyId}})
+        usersColl.update_one(userKey,
+                             {"$addToSet": {"message_ids": messageKeyId}})
 
-        messagesCollection.update_one({"_id": messageKeyId}, 
-                                      {"$addToSet": {"user_ids": userKey["_id"]}})
+        messagesColl.update_one({"_id": messageKeyId},
+                                {"$addToSet": {"user_ids": userKey["_id"]}})
 
-        for k in sentenceObj["keywords"]:
+        for k in sObj["keywords"]:
             keywordKeyId = None
-            cursor = keywordsCollection.find_one({"keyword": k["keyword"]})
+            cursor = keywordsColl.find_one({"keyword": k["keyword"]})
             if cursor:
                 keywordKeyId = cursor["_id"]
             else:
-                cursor = keywordsCollection.insert_one({"keyword": k["keyword"], 
-                                                        "keyword_type": k["keyword_type"]})
+                tempDict = {}
+                tempDict["keyword"] = k["keyword"]
+                tempDict["keyword_type"] = k["keyword_type"]
+                cursor = keywordsColl.insert_one(tempDict)
                 keywordKeyId = cursor.inserted_id
 
-            keywordsCollection.update_one({"_id": keywordKeyId}, 
-                                          {"$addToSet": {"user_ids": userKey["_id"], 
-                                                         "messages_ids": messageKeyId}})
+            tempDictK = {}
+            tempDictK["user_ids"] = userKey["_id"]
+            tempDictK["messages_ids"] = messageKeyId
+            keywordsColl.update_one({"_id": keywordKeyId},
+                                    {"$addToSet": tempDictK})
 
-            messagesCollection.update_one({"_id": messageKeyId}, 
-                                          {"$addToSet": {"keyword_ids": keywordKeyId}})
+            tempDictM = {}
+            tempDictM["keyword_ids"] = keywordKeyId
+            messagesColl.update_one({"_id": messageKeyId},
+                                    {"$addToSet": tempDictM})
 
     if not current_app.config['TESTING']:
         userClient.close()
@@ -155,29 +165,32 @@ def update(resp, login_type):
     })
 
 
-@repository_blueprint.route('/repository/findSentencesByUsername/<username>', methods=['POST'])
+@repository_blueprint.route('/repository/findSentencesByUsername/<username>',
+                            methods=['POST'])
 @authenticate
 def findSentencesByUsername(resp, login_type, username):
-    
+
     name = getDBname(resp)
     if not name:
         return jsonify({
             'status': 'Fail',
             'message': 'Internal server error'
         }), 400
-    
+
     repository_uri = current_app.config['REPOSITORY_URI']
 
     if current_app.config['TESTING']:
         db = mongo.cx[name]
     else:
-        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        userClient = MongoClient(f"mongodb://{name}:{name}@" +
+                                 repository_uri +
+                                 f"/{name}")
         db = userClient[name]
 
-    usersCollection = db["users"]
-    messagesCollection = db["messages"]
+    usersColl = db["users"]
+    messagesColl = db["messages"]
 
-    userObj = usersCollection.find_one({"username": username});
+    userObj = usersColl.find_one({"username": username})
 
     if not userObj:
         return jsonify({
@@ -190,7 +203,7 @@ def findSentencesByUsername(resp, login_type, username):
     messagesObj = []
     for index, message_id in enumerate(message_ids):
         messageObj = {}
-        message = messagesCollection.find_one({"_id": message_id})
+        message = messagesColl.find_one({"_id": message_id})
         messageObj["message"] = message["message"]
         messageObj["room_id"] = userObj["room_id"]
         messageObj["tmi_sent_ts"] = userObj["tmi_sent_ts"][index]
@@ -212,7 +225,8 @@ def findSentencesByUsername(resp, login_type, username):
         })
 
 
-@repository_blueprint.route('/repository/findSentencesByDisplayname/<display_name>', methods=['POST'])
+@repository_blueprint.route('/repository/findSentencesByDisplayname/' +
+                            '<display_name>', methods=['POST'])
 @authenticate
 def findSentencesByDisplayname(resp, login_type, display_name):
 
@@ -222,19 +236,21 @@ def findSentencesByDisplayname(resp, login_type, display_name):
             'status': 'Fail',
             'message': 'Internal server error'
         }), 400
-    
+
     repository_uri = current_app.config['REPOSITORY_URI']
 
     if current_app.config['TESTING']:
         db = mongo.cx[name]
     else:
-        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        userClient = MongoClient(f"mongodb://{name}:{name}@" +
+                                 repository_uri +
+                                 f"/{name}")
         db = userClient[name]
 
-    usersCollection = db["users"]
-    messagesCollection = db["messages"]
+    usersColl = db["users"]
+    messagesColl = db["messages"]
 
-    userObj = usersCollection.find_one({"display_name": display_name});
+    userObj = usersColl.find_one({"display_name": display_name})
 
     if not userObj:
         return jsonify({
@@ -247,7 +263,7 @@ def findSentencesByDisplayname(resp, login_type, display_name):
     messagesObj = []
     for index, message_id in enumerate(message_ids):
         messageObj = {}
-        message = messagesCollection.find_one({"_id": message_id})
+        message = messagesColl.find_one({"_id": message_id})
         messageObj["message"] = message["message"]
         messageObj["room_id"] = userObj["room_id"]
         messageObj["tmi_sent_ts"] = userObj["tmi_sent_ts"][index]
@@ -269,7 +285,8 @@ def findSentencesByDisplayname(resp, login_type, display_name):
         })
 
 
-@repository_blueprint.route('/repository/findDisplaynamesByKeyword/<keyword>', methods=['POST'])
+@repository_blueprint.route('/repository/findDisplaynamesByKeyword/' +
+                            '<keyword>', methods=['POST'])
 @authenticate
 def findDisplaynamesByKeyword(resp, login_type, keyword):
 
@@ -279,19 +296,21 @@ def findDisplaynamesByKeyword(resp, login_type, keyword):
             'status': 'Fail',
             'message': 'Internal server error'
         }), 400
-    
+
     repository_uri = current_app.config['REPOSITORY_URI']
 
     if current_app.config['TESTING']:
         db = mongo.cx[name]
     else:
-        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        userClient = MongoClient(f"mongodb://{name}:{name}@" +
+                                 repository_uri +
+                                 f"/{name}")
         db = userClient[name]
 
-    usersCollection = db["users"]
-    keywordsCollection = db["keywords"]
+    usersColl = db["users"]
+    keywordsColl = db["keywords"]
 
-    keywordObj = keywordsCollection.find_one({"keyword": keyword});
+    keywordObj = keywordsColl.find_one({"keyword": keyword})
 
     if not keywordObj:
         return jsonify({
@@ -304,7 +323,7 @@ def findDisplaynamesByKeyword(resp, login_type, keyword):
     users = []
     for index, user_id in enumerate(user_ids):
         userObj = {}
-        user = usersCollection.find_one({"_id": user_id})
+        user = usersColl.find_one({"_id": user_id})
         userObj["display_name"] = user["display_name"]
         userObj["id"] = index
         users.append(userObj)
@@ -324,7 +343,8 @@ def findDisplaynamesByKeyword(resp, login_type, keyword):
         })
 
 
-@repository_blueprint.route('/repository/findDisplaynamesBySentence/<sentence>', methods=['POST'])
+@repository_blueprint.route('/repository/findDisplaynamesBySentence/' +
+                            '<sentence>', methods=['POST'])
 @authenticate
 def findDisplaynamesBySentence(resp, login_type, sentence):
 
@@ -340,26 +360,28 @@ def findDisplaynamesBySentence(resp, login_type, sentence):
     if current_app.config['TESTING']:
         db = mongo.cx[name]
     else:
-        userClient = MongoClient(f"mongodb://{name}:{name}@" + repository_uri + f"/{name}")
+        userClient = MongoClient(f"mongodb://{name}:{name}@" +
+                                 repository_uri +
+                                 f"/{name}")
         db = userClient[name]
 
-    usersCollection = db["users"]
-    messagesCollection = db["messages"]
+    usersColl = db["users"]
+    messagesColl = db["messages"]
     print(f'sentence={sentence}', file=sys.stderr)
-    sentenceObj = messagesCollection.find_one({"message": sentence});
+    sObj = messagesColl.find_one({"message": sentence})
 
-    if not sentenceObj:
+    if not sObj:
         return jsonify({
             'status': 'Fail',
             'message': f'There is no sentence({sentence}).',
         }), 404
 
-    user_ids = sentenceObj["user_ids"]
+    user_ids = sObj["user_ids"]
 
     users = []
     for index, user_id in enumerate(user_ids):
         userObj = {}
-        user = usersCollection.find_one({"_id": user_id})
+        user = usersColl.find_one({"_id": user_id})
         userObj["display_name"] = user["display_name"]
         userObj["id"] = index
         users.append(userObj)
@@ -388,4 +410,3 @@ def getDBname(resp):
     elif resp["data"]["id"]:
         name = "normal_" + resp["data"]["id"]
     return name
-
