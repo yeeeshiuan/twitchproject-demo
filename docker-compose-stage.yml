@@ -1,0 +1,92 @@
+version: '3.6'
+services:
+  client:
+    build:
+      context: ./services/client
+      dockerfile: Dockerfile-stage
+    volumes:
+      - './services/client:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    expose:
+      - 3000
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_DOMAIN_NAME_URL=${REACT_APP_DOMAIN_NAME_URL}
+      - REACT_APP_CSRF_TOKEN=${REACT_APP_CSRF_TOKEN}
+      - REACT_APP_TWITCH_CALLBACK_URL=${REACT_APP_TWITCH_CALLBACK_URL}
+      - REACT_APP_TWITCH_OAUTH_LINK=${REACT_APP_TWITCH_OAUTH_LINK}
+      - REACT_APP_TWITCH_CLIENT_ID=${REACT_APP_TWITCH_CLIENT_ID}
+      - REACT_APP_TWITCH_USER_NAME=${REACT_APP_TWITCH_USER_NAME}
+      - REACT_APP_TWITCH_OAUTH_TOKEN=${REACT_APP_TWITCH_OAUTH_TOKEN}
+      - REACT_APP_TWITCH_TOP_STREAM_API_URL=${REACT_APP_TWITCH_TOP_STREAM_API_URL}
+    depends_on:
+      - users
+  nginx:
+    build:
+      context: ./services/nginx
+      dockerfile: Dockerfile-stage
+    restart: always
+    ports:
+      - 80:80
+    depends_on:
+      - users
+      - client
+  users:
+    build:
+      context: ./services/users
+      dockerfile: Dockerfile-stage
+    expose:
+      - 5000
+    environment:
+      - APP_SETTINGS=project.config.StagingConfig
+      - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users_stage
+      - DATABASE_TEST_URL=postgres://postgres:postgres@users-db:5432/users_test
+      - SECRET_KEY=my_precious
+    depends_on:
+      - users-db
+  users-db:
+    build:
+      context: ./services/users/project/db
+      dockerfile: Dockerfile
+    ports:
+      - 5435:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  lexical:
+    build:
+      context: ./services/lexical
+      dockerfile: Dockerfile-stage
+    expose:
+      - 5000
+    environment:
+      - APP_SETTINGS=project.config.StagingConfig
+      - USERS_SERVICE_URL=${REACT_APP_DOMAIN_NAME_URL}
+      - SECRET_KEY=my_precious
+    depends_on:
+      - users
+  repository:
+    build:
+      context: ./services/repository
+      dockerfile: Dockerfile-stage
+    expose:
+      - 5000
+    environment:
+      - APP_SETTINGS=project.config.StagingConfig
+      - MONGO_URI=mongodb://mongodb:mongodb@repository-db:27017
+      - MONGO_TEST_URI=mongodb://mongodb:mongodb@repository-db:27017/test
+      - USERS_SERVICE_URL=${REACT_APP_DOMAIN_NAME_URL}
+      - REPOSITORY_URI=repository-db:27017
+      - SECRET_KEY=my_precious
+    depends_on:
+      - users
+      - repository-db
+  repository-db:
+    build:
+      context: ./services/repository/project/db
+      dockerfile: Dockerfile
+    ports:
+      - 27020:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=mongodb
