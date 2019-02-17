@@ -4,11 +4,8 @@ services:
     build:
       context: ./services/client
       dockerfile: Dockerfile-stage
-    volumes:
-      - './services/client:/usr/src/app'
-      - '/usr/src/app/node_modules'
     expose:
-      - 3000
+      - 80
     environment:
       - NODE_ENV=production
       - REACT_APP_DOMAIN_NAME_URL=${REACT_APP_DOMAIN_NAME_URL}
