@@ -4,18 +4,18 @@ services:
     build:
       context: ./services/client
       dockerfile: Dockerfile-stage
+      args:
+        NODE_ENV: production
+        REACT_APP_DOMAIN_NAME_URL: ${REACT_APP_DOMAIN_NAME_URL}
+        REACT_APP_CSRF_TOKEN: ${REACT_APP_CSRF_TOKEN}
+        REACT_APP_TWITCH_CALLBACK_URL: ${REACT_APP_TWITCH_CALLBACK_URL}
+        REACT_APP_TWITCH_OAUTH_LINK: ${REACT_APP_TWITCH_OAUTH_LINK}
+        REACT_APP_TWITCH_CLIENT_ID: ${REACT_APP_TWITCH_CLIENT_ID}
+        REACT_APP_TWITCH_USER_NAME: ${REACT_APP_TWITCH_USER_NAME}
+        REACT_APP_TWITCH_OAUTH_TOKEN: ${REACT_APP_TWITCH_OAUTH_TOKEN}
+        REACT_APP_TWITCH_TOP_STREAM_API_URL: ${REACT_APP_TWITCH_TOP_STREAM_API_URL}
     expose:
       - 80
-    environment:
-      - NODE_ENV=production
-      - REACT_APP_DOMAIN_NAME_URL=${REACT_APP_DOMAIN_NAME_URL}
-      - REACT_APP_CSRF_TOKEN=${REACT_APP_CSRF_TOKEN}
-      - REACT_APP_TWITCH_CALLBACK_URL=${REACT_APP_TWITCH_CALLBACK_URL}
-      - REACT_APP_TWITCH_OAUTH_LINK=${REACT_APP_TWITCH_OAUTH_LINK}
-      - REACT_APP_TWITCH_CLIENT_ID=${REACT_APP_TWITCH_CLIENT_ID}
-      - REACT_APP_TWITCH_USER_NAME=${REACT_APP_TWITCH_USER_NAME}
-      - REACT_APP_TWITCH_OAUTH_TOKEN=${REACT_APP_TWITCH_OAUTH_TOKEN}
-      - REACT_APP_TWITCH_TOP_STREAM_API_URL=${REACT_APP_TWITCH_TOP_STREAM_API_URL}
     depends_on:
       - users
   nginx:
@@ -58,7 +58,7 @@ services:
       - 5000
     environment:
       - APP_SETTINGS=project.config.StagingConfig
-      - USERS_SERVICE_URL=${REACT_APP_DOMAIN_NAME_URL}
+      - USERS_SERVICE_URL=http://users:5000
       - SECRET_KEY=my_precious
     depends_on:
       - users
@@ -72,7 +72,7 @@ services:
       - APP_SETTINGS=project.config.StagingConfig
       - MONGO_URI=mongodb://mongodb:mongodb@repository-db:27017
       - MONGO_TEST_URI=mongodb://mongodb:mongodb@repository-db:27017/test
-      - USERS_SERVICE_URL=${REACT_APP_DOMAIN_NAME_URL}
+      - USERS_SERVICE_URL=http://users:5000
       - REPOSITORY_URI=repository-db:27017
       - SECRET_KEY=my_precious
     depends_on:
