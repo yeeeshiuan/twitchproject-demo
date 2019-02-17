@@ -68,7 +68,7 @@ e2e() {
   docker-compose -f docker-compose-$1.yml exec repository python manage.py seed-db
 
   nowDoing cypress test
-  ./node_modules/.bin/cypress run --config baseUrl=http://localhost
+  ./node_modules/.bin/cypress run --config baseUrl=http://127.0.0.1
   inspect $? e2e
 
   docker-compose -f docker-compose-$1.yml down
