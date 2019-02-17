@@ -16,8 +16,12 @@ RUN pip install -r requirements.txt
 # add app
 COPY . /usr/src/app
 
-# add executed permission
+# add entrypoint.sh
+COPY ./entrypoint.sh /usr/src/app/entrypoint-stage.sh
 RUN chmod +x /usr/src/app/entrypoint-stage.sh
+
+# add app
+COPY . /usr/src/app
 
 # run server
 CMD ["/usr/src/app/entrypoint-stage.sh"]
