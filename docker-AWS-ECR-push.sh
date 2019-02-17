@@ -5,11 +5,18 @@ then
 
   if [[ "$TRAVIS_BRANCH" == "staging" ]]; then
     export DOCKER_ENV=stage
+<<<<<<< HEAD
     export NODE_ENV=production
     export REACT_APP_DOMAIN_NAME_URL="http://twitchproject-staging-alb-640128092.us-east-1.elb.amazonaws.com"
     export REACT_APP_CSRF_TOKEN="c3ab8aa609ea11e793ae92361f002672"
     export REACT_APP_TWITCH_OAUTH_LINK="https://id.twitch.tv/oauth2/authorize"
     export REACT_APP_TWITCH_TOP_STREAM_API_URL="https://api.twitch.tv/kraken/streams/?language=zh-tw&limit=1"
+=======
+    export REACT_APP_DOMAIN_NAME_URL="http://twitchproject-staging-alb-640128092.us-east-1.elb.amazonaws.com"
+    export REACT_APP_CSRF_TOKEN="c3ab8aa609ea11e793ae92361f002672"
+    export REACT_APP_TWITCH_OAUTH_LINK="https://id.twitch.tv/oauth2/authorize"
+    export REACT_APP_TWITCH_TOP_STREAM_API_URL="https://api.twitch.tv/kraken/streams/?language=zh-tw\&limit=1"
+>>>>>>> create staging version
     export REACT_APP_TWITCH_CALLBACK_URL="http://twitchproject-staging-alb-640128092.us-east-1.elb.amazonaws.com/authByTwitch/"
     export REACT_APP_TWITCH_CLIENT_ID="k5vlxcnpyhddnyo3l2kjfcpovg46yr"
     export REACT_APP_TWITCH_USER_NAME="yeeeshiuandev"
@@ -17,7 +24,10 @@ then
 
   elif [[ "$TRAVIS_BRANCH" == "production" ]]; then
     export DOCKER_ENV=prod
+<<<<<<< HEAD
     export NODE_ENV=production
+=======
+>>>>>>> create staging version
     export REACT_APP_DOMAIN_NAME_URL=""
     export REACT_APP_CSRF_TOKEN=""
     export REACT_APP_TWITCH_OAUTH_LINK=""
@@ -58,7 +68,11 @@ then
     docker push $REPO/$USERS_DB:$TAG
 
     # client
+<<<<<<< HEAD
     docker build $CLIENT_REPO -t $CLIENT:$COMMIT -f Dockerfile-$DOCKER_ENV --build-arg NODE_ENV=$NODE_ENV --build-arg REACT_APP_DOMAIN_NAME_URL=$REACT_APP_DOMAIN_NAME_URL --build-arg REACT_APP_CSRF_TOKEN=$REACT_APP_CSRF_TOKEN --build-arg REACT_APP_TWITCH_OAUTH_LINK=$REACT_APP_TWITCH_OAUTH_LINK --build-arg REACT_APP_TWITCH_TOP_STREAM_API_URL=$REACT_APP_TWITCH_TOP_STREAM_API_URL --build-arg REACT_APP_TWITCH_CALLBACK_URL=$REACT_APP_TWITCH_CALLBACK_URL --build-arg REACT_APP_TWITCH_USER_NAME=$REACT_APP_TWITCH_USER_NAME --build-arg REACT_APP_TWITCH_CLIENT_ID=$REACT_APP_TWITCH_CLIENT_ID  --build-arg REACT_APP_TWITCH_OAUTH_TOKEN=$REACT_APP_TWITCH_OAUTH_TOKEN
+=======
+    docker build $CLIENT_REPO -t $CLIENT:$COMMIT -f Dockerfile-$DOCKER_ENV --build-arg REACT_APP_DOMAIN_NAME_URL=$REACT_APP_DOMAIN_NAME_URL --build-arg REACT_APP_CSRF_TOKEN=$REACT_APP_CSRF_TOKEN --build-arg REACT_APP_TWITCH_OAUTH_LINK=$REACT_APP_TWITCH_OAUTH_LINK --build-arg REACT_APP_TWITCH_TOP_STREAM_API_URL=$REACT_APP_TWITCH_TOP_STREAM_API_URL --build-arg REACT_APP_TWITCH_CALLBACK_URL=$REACT_APP_TWITCH_CALLBACK_URL --build-arg REACT_APP_TWITCH_USER_NAME=$REACT_APP_TWITCH_USER_NAME --build-arg REACT_APP_TWITCH_CLIENT_ID=$REACT_APP_TWITCH_CLIENT_ID  --build-arg REACT_APP_TWITCH_OAUTH_TOKEN=$REACT_APP_TWITCH_OAUTH_TOKEN
+>>>>>>> create staging version
     docker tag $CLIENT:$COMMIT $REPO/$CLIENT:$TAG
     docker push $REPO/$CLIENT:$TAG
 
