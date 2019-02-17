@@ -16,5 +16,8 @@ RUN pip install -r requirements.txt
 # add app
 COPY . /usr/src/app
 
+# add executed permission
+RUN chmod +x /usr/src/app/entrypoint-stage.sh
+
 # run server
-RUN gunicorn -b 0.0.0.0:5000 manage:app
+CMD ["/usr/src/app/entrypoint-stage.sh"]
