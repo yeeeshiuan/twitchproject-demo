@@ -9,7 +9,7 @@ then
     export REACT_APP_DOMAIN_NAME_URL="http://twitchproject-staging-alb-640128092.us-east-1.elb.amazonaws.com"
     export REACT_APP_CSRF_TOKEN="c3ab8aa609ea11e793ae92361f002672"
     export REACT_APP_TWITCH_OAUTH_LINK="https://id.twitch.tv/oauth2/authorize"
-    export REACT_APP_TWITCH_TOP_STREAM_API_URL="https://api.twitch.tv/kraken/streams/?language=zh-tw\&limit=1"
+    export REACT_APP_TWITCH_TOP_STREAM_API_URL="https://api.twitch.tv/kraken/streams/?language=zh-tw&limit=1"
     export REACT_APP_TWITCH_CALLBACK_URL="http://twitchproject-staging-alb-640128092.us-east-1.elb.amazonaws.com/authByTwitch/"
     export REACT_APP_TWITCH_CLIENT_ID="k5vlxcnpyhddnyo3l2kjfcpovg46yr"
     export REACT_APP_TWITCH_USER_NAME="yeeeshiuandev"
