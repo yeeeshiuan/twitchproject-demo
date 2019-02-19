@@ -8,6 +8,14 @@ from project import db
 auth_blueprint = Blueprint('auth', __name__)
 
 
+@auth_blueprint.route('/auth/ping', methods=['GET'])
+def ping_pong():
+    return jsonify({
+        'status': 'success',
+        'message': 'pong!'
+    })
+
+
 @auth_blueprint.route('/auth/twitchRegister', methods=['POST'])
 def twitch_Register():
     # get post data

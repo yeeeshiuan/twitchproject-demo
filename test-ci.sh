@@ -62,10 +62,10 @@ e2e() {
   docker-compose -f docker-compose-$1.yml up -d --build
 
   nowDoing database seeding
-  docker-compose -f docker-compose-dev.yml exec users python manage.py recreate-db
-  docker-compose -f docker-compose-dev.yml exec users python manage.py seed-db
-  docker-compose -f docker-compose-dev.yml exec repository python manage.py create-user
-  docker-compose -f docker-compose-dev.yml exec repository python manage.py seed-db
+  docker-compose -f docker-compose-$1.yml exec users python manage.py recreate-db
+  docker-compose -f docker-compose-$1.yml exec users python manage.py seed-db
+  docker-compose -f docker-compose-$1.yml exec repository python manage.py create-user
+  docker-compose -f docker-compose-$1.yml exec repository python manage.py seed-db
 
   nowDoing cypress test
   ./node_modules/.bin/cypress run --config baseUrl=http://localhost
