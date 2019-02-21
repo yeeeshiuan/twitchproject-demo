@@ -166,7 +166,7 @@ def update(resp, login_type):
 
 
 @repository_blueprint.route('/repository/findSentencesByUsername/<username>',
-                            methods=['POST'])
+                            methods=['GET'])
 @authenticate
 def findSentencesByUsername(resp, login_type, username):
 
@@ -226,7 +226,7 @@ def findSentencesByUsername(resp, login_type, username):
 
 
 @repository_blueprint.route('/repository/findSentencesByDisplayname/' +
-                            '<display_name>', methods=['POST'])
+                            '<display_name>', methods=['GET'])
 @authenticate
 def findSentencesByDisplayname(resp, login_type, display_name):
 
@@ -286,7 +286,7 @@ def findSentencesByDisplayname(resp, login_type, display_name):
 
 
 @repository_blueprint.route('/repository/findDisplaynamesByKeyword/' +
-                            '<keyword>', methods=['POST'])
+                            '<keyword>', methods=['GET'])
 @authenticate
 def findDisplaynamesByKeyword(resp, login_type, keyword):
 
@@ -344,7 +344,7 @@ def findDisplaynamesByKeyword(resp, login_type, keyword):
 
 
 @repository_blueprint.route('/repository/findDisplaynamesBySentence/' +
-                            '<sentence>', methods=['POST'])
+                            '<sentence>', methods=['GET'])
 @authenticate
 def findDisplaynamesBySentence(resp, login_type, sentence):
 

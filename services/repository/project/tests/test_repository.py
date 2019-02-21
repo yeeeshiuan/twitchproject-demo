@@ -108,7 +108,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """ /repository/findSentencesByUsername/<username> """
         # arrange
         username = "testUser"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findSentencesByUsername/{username}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -150,7 +150,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if the username is not exist."""
         # arrange
         username = "testUser"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findSentencesByUsername/{username}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -170,7 +170,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if no message exist."""
         # arrange
         username = "testUser"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findSentencesByUsername/{username}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -198,7 +198,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """ /repository/findSentencesByDisplayname/<display_name> """
         # arrange
         display_name = "testUser"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findSentencesByDisplayname/{display_name}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -239,7 +239,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if the displayname is not exist."""
         # arrange
         display_name = "testUser"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findSentencesByDisplayname/{display_name}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -259,7 +259,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if no message exist."""
         # arrange
         display_name = "testUser"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findSentencesByDisplayname/{display_name}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -287,7 +287,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """ /repository/findDisplaynamesByKeyword/<keyword> """
         # arrange
         keyword = "noun"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findDisplaynamesByKeyword/{keyword}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -324,7 +324,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if the keyword is not exist."""
         # arrange
         keyword = "noun"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findDisplaynamesByKeyword/{keyword}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -344,7 +344,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if no user exist."""
         # arrange
         keyword = "noun"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findDisplaynamesByKeyword/{keyword}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -371,7 +371,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """  /repository/findDisplaynamesBySentence/<sentence> """
         # arrange
         sentence = "abcd"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findDisplaynamesBySentence/{sentence}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -408,7 +408,7 @@ class TestRepositoryBlueprint(BaseTestCase):
 
         # arrange
         sentence = "abcd"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findDisplaynamesBySentence/{sentence}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )
@@ -428,7 +428,7 @@ class TestRepositoryBlueprint(BaseTestCase):
         """Ensure error is thrown if no user exist."""
         # arrange
         sentence = "abcd"
-        future = go(self.client.post,
+        future = go(self.client.get,
                     f'/repository/findDisplaynamesBySentence/{sentence}',
                     headers=dict(Authorization='Bearer valid', LoginType='sso')
                     )

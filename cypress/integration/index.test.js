@@ -26,7 +26,7 @@ describe('Index', () => {
       .get('a').contains('Log Out Here!');
 
     cy.server();
-    cy.route('POST', '/repository/findSentencesByUsername/' + username).as('findSentencesByUsername');
+    cy.route('GET', '/repository/findSentencesByUsername/' + username).as('findSentencesByUsername');
     cy.get('input[name="findSentencesByUsername"]').type(username)
       .get('input[data-cy="usernameSubmit"]').click()
       .wait('@findSentencesByUsername')
@@ -37,7 +37,7 @@ describe('Index', () => {
       .eq(1).should('contain', sentence);
 
     cy.server();
-    cy.route('POST', '/repository/findSentencesByDisplayname/' + display_name).as('findSentencesByDisplay_name');
+    cy.route('GET', '/repository/findSentencesByDisplayname/' + display_name).as('findSentencesByDisplay_name');
     cy.get('input[name="findSentencesByDisplay_name"]').type(display_name)
       .get('input[data-cy="display_nameSubmit"]').click()
       .wait('@findSentencesByDisplay_name')
@@ -48,7 +48,7 @@ describe('Index', () => {
       .eq(1).should('contain', sentence);
 
     cy.server();
-    cy.route('POST', '/repository/findDisplaynamesByKeyword/' + keyword).as('findDisplay_namesByKeyword');
+    cy.route('GET', '/repository/findDisplaynamesByKeyword/' + keyword).as('findDisplay_namesByKeyword');
     cy.get('input[name="findDisplay_namesByKeyword"]').type(keyword)
       .get('input[data-cy="keywordSubmit"]').click()
       .wait('@findDisplay_namesByKeyword')
@@ -59,7 +59,7 @@ describe('Index', () => {
       .eq(1).should('contain', display_name);
 
     cy.server();
-    cy.route('POST', '/repository/findDisplaynamesBySentence/' + sentence).as('findDisplay_namesBySentence');
+    cy.route('GET', '/repository/findDisplaynamesBySentence/' + sentence).as('findDisplay_namesBySentence');
     cy.get('input[name="findDisplay_namesBySentence"]').type(sentence)
       .get('input[data-cy="sentenceSubmit"]').click()
       .wait('@findDisplay_namesBySentence')

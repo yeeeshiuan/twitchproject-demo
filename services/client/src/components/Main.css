@@ -1,0 +1,29 @@
+.flowLeft {
+    float: left;
+    border: 5px dashed #003366;
+}
+
+.controlPanel {
+    height: auto;
+    width: 630px;
+    float: left;
+    border: 5px dashed #112322;
+}
+
+.chartPanel {
+    width: auto;
+    float: left;
+    border: 5px dashed #841689;
+}
+
+
+.searchPanel {
+    height: 200px;
+    width: 725px;
+    overflow-y: scroll;
+    border: 5px dashed #990022;
+}
+
+
+
+
