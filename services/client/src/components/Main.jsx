@@ -107,7 +107,6 @@ class Main extends Component {
 
     axios(options)
     .then((res) => { 
-        console.log(res.data);
         this.setState({findingResult: res.data.message});
     })
   }

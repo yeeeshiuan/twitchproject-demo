@@ -23,7 +23,7 @@ class Logout extends Component {
 
     axios(options)
     .then((res) => { 
-        console.log(res.data);
+
     })
   }
 
