@@ -1,3 +1,5 @@
+import sys
+
 from flask import Blueprint, jsonify, request
 from sqlalchemy import exc, or_
 
@@ -32,6 +34,11 @@ def twitch_Register():
     username = post_data.get('username')
     email = post_data.get('email')
     picture = post_data.get('picture')
+
+    # logging
+    print(f'User({twitch_id}, {username}) try to register or login.',
+          file=sys.stderr)
+
     try:
         # check for existing user
         user = UserSSO.query.filter(
@@ -66,6 +73,13 @@ def twitch_Register():
 @auth_blueprint.route('/auth/logout', methods=['GET'])
 @authenticate
 def logout_user(resp, login_type):
+
+    user = UserSSO.query.filter_by(id=resp).first()
+
+    # logging
+    print(f'User({user.twitch_id}, {user.username}) try to logout.',
+          file=sys.stderr)
+
     response_object = {
         'status': 'success',
         'message': 'Successfully logged out.'
@@ -78,6 +92,10 @@ def logout_user(resp, login_type):
 def get_user_status(resp, login_type):
 
     user = UserSSO.query.filter_by(id=resp).first()
+
+    # logging
+    print(f'User({user.twitch_id}, {user.username}) try to get auth.',
+          file=sys.stderr)
 
     response_object = {
         'status': 'success',

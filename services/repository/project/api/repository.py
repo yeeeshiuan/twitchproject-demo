@@ -41,6 +41,9 @@ def create_user(resp, login_type):
             'message': 'Internal server error'
         })
 
+    # logging
+    print(f'Create a New user, user name is {name}.',
+          file=sys.stderr)
     try:
         # create the db and create the user
         userdb = mongo.cx[name]
@@ -73,10 +76,12 @@ def update(resp, login_type):
             'message': 'Internal server error'
         })
 
+    # logging
+    print(f'User\'s mongo document({name}) try to update.',
+          file=sys.stderr)
+
     # get post data
     post_data = request.get_json()
-    print(f'post_data={post_data}, dataType={type(post_data)}',
-          file=sys.stderr)
 
     response_object = {
         'status': 'fail',
@@ -87,6 +92,7 @@ def update(resp, login_type):
         return jsonify(response_object), 400
 
     sentencesObj = post_data.get('sentencesObj')
+    # lgging
     print(f'sentence={sentencesObj}, dataType={type(sentencesObj)}',
           file=sys.stderr)
 
@@ -187,6 +193,11 @@ def findSentencesByUsername(resp, login_type, username):
                                  f"/{name}")
         db = userClient[name]
 
+    # logging
+    print(f'Finding sentences by Twitch\'s username({username}),' +
+          f' user\'s mongo document is {name}.',
+          file=sys.stderr)
+
     usersColl = db["users"]
     messagesColl = db["messages"]
 
@@ -246,6 +257,11 @@ def findSentencesByDisplayname(resp, login_type, display_name):
                                  repository_uri +
                                  f"/{name}")
         db = userClient[name]
+
+    # logging
+    print(f'Finding sentences by Twitch\'s display name({display_name}),' +
+          f' user\'s mongo document is {name}.',
+          file=sys.stderr)
 
     usersColl = db["users"]
     messagesColl = db["messages"]
@@ -307,6 +323,11 @@ def findDisplaynamesByKeyword(resp, login_type, keyword):
                                  f"/{name}")
         db = userClient[name]
 
+    # logging
+    print(f'Finding display name by keyword({keyword}),' +
+          f' user\'s mongo document is {name}.',
+          file=sys.stderr)
+
     usersColl = db["users"]
     keywordsColl = db["keywords"]
 
@@ -365,9 +386,13 @@ def findDisplaynamesBySentence(resp, login_type, sentence):
                                  f"/{name}")
         db = userClient[name]
 
+    # logging
+    print(f'Finding display name by sentence({sentence}),' +
+          f' user\'s mongo document is {name}.',
+          file=sys.stderr)
+
     usersColl = db["users"]
     messagesColl = db["messages"]
-    print(f'sentence={sentence}', file=sys.stderr)
     sObj = messagesColl.find_one({"message": sentence})
 
     if not sObj:

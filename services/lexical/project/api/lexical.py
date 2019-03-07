@@ -36,6 +36,14 @@ def ping_authpong(resp, login_type):
 @lexical_blueprint.route('/lexical/sentences', methods=['POST'])
 @authenticate
 def analyze(resp, login_type):
+
+    twitch_id = resp["data"]["twitch_id"]
+    username = resp["data"]["username"]
+
+    # logging
+    print(f'User({twitch_id}, {username}) try to use lexical.',
+          file=sys.stderr)
+
     # get post data
     post_data = request.get_json()
 
@@ -47,7 +55,6 @@ def analyze(resp, login_type):
         return jsonify(response_object), 400
 
     sentences = post_data.get('sentences')
-    print(f'sentence={sentences}, dataType={type(sentences)}', file=sys.stderr)
 
     if not isinstance(sentences, list):
         return jsonify(response_object), 400
@@ -66,6 +73,7 @@ def analyze(resp, login_type):
 
     # 分詞，並依照詞性填入對應的dict 中
     for sentence in sentences:
+        # logging
         print(f'sentence={sentence}, dataType={type(sentence)}',
               file=sys.stderr)
 
